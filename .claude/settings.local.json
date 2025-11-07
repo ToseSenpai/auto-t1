@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(tree:*)",
+      "Bash(git -C /c/Users/itose/auto-t1 log --oneline -5)",
+      "Bash(git -C /c/Users/itose/auto-t1 config --local user.name)",
+      "Bash(cat:*)",
+      "Bash(data.gitkeep)",
+      "Bash(logs.gitkeep)",
+      "Bash(curl:*)",
+      "Bash(npm run compile:*)",
+      "Bash(npm run electron:dev:*)",
+      "Bash(echo:*)",
+      "Bash(unset:*)",
+      "Bash(node -e:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
