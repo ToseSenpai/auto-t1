@@ -23,6 +23,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   getAutomationUrl: () => ipcRenderer.invoke("automation:get-url"),
 
+  checkMrnRange: (data: {
+    username: string;
+    password: string;
+    excelPath: string;
+  }) => ipcRenderer.invoke("automation:check-mrn-range", data),
+
   // Listener per eventi dal main process
   onStatus: (callback: (data: { type: string; message: string }) => void) => {
     ipcRenderer.on("automation:status", (_, data) => callback(data));
@@ -65,6 +71,11 @@ export interface ElectronAPI {
   }>;
   stopAutomation: () => Promise<{ success: boolean; error?: string }>;
   getAutomationUrl: () => Promise<{ success: boolean; url: string }>;
+  checkMrnRange: (data: {
+    username: string;
+    password: string;
+    excelPath: string;
+  }) => Promise<{ success: boolean; count?: number; error?: string }>;
   onStatus: (callback: (data: { type: string; message: string }) => void) => void;
   onProgress: (
     callback: (data: { current: number; total: number; rowData: any }) => void

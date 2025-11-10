@@ -69,6 +69,41 @@ function Controls() {
     }
   };
 
+  const handleCheckMRN = async () => {
+    if (!username || !password) {
+      addLog("error", "Inserisci username e password");
+      return;
+    }
+
+    if (!excelPath) {
+      addLog("error", "Seleziona un file Excel");
+      return;
+    }
+
+    try {
+      startAutomation();
+      addLog("info", "Avvio check MRN posteriori...");
+
+      // Avvia check MRN tramite IPC
+      const result = await window.electronAPI.checkMrnRange({
+        username,
+        password,
+        excelPath,
+      });
+
+      if (result.success) {
+        addLog("success", `Check completato! Trovate ${result.count || 0} dichiarazioni`);
+      } else {
+        addLog("error", result.error || "Errore check MRN");
+      }
+
+      stopAutomation();
+    } catch (error) {
+      addLog("error", `Errore check MRN: ${error}`);
+      stopAutomation();
+    }
+  };
+
   const getFileName = () => {
     if (!excelPath) return "Nessun file selezionato";
     const parts = excelPath.split(/[\\/]/);
@@ -168,6 +203,33 @@ function Controls() {
             </button>
           </>
         )}
+      </div>
+
+      {/* Separator */}
+      <div className="border-t border-gray-700 pt-3">
+        <button
+          onClick={handleCheckMRN}
+          disabled={isRunning}
+          className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          Check MRN Posteriori
+        </button>
+        <p className="text-xs text-gray-400 text-center mt-1">
+          Cerca dichiarazioni ultimi 30 giorni
+        </p>
       </div>
     </div>
   );

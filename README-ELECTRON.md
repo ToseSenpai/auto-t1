@@ -2,6 +2,17 @@
 
 🚀 **Applicazione Desktop** moderna per automatizzare operazioni ripetitive su siti web, con interfaccia grafica e browser integrato.
 
+## 🆕 Novità v1.1.0 (Parte 2 Completata)
+
+- ✨ **MRN Search & Data Extraction**: Ricerca automatica MRN con estrazione risultati da tabella web
+- ✨ **Settings Configuration**: Automazione configurazione filtri (Public Layout "STANDARD ST")
+- ✨ **Date Range Automation**: Fill automatico range date (oggi - 1 mese → oggi)
+- ✨ **Table Header Extraction**: Estrazione dinamica titoli colonne da vaadin-grid
+- ✨ **Multi-MRN Loop Processing**: Loop automatico su tutti MRN con progress tracking [X/Y]
+- ✨ **Excel Writing with Headers**: Scrittura Excel con header + dati multipli su righe consecutive
+- ✨ **MRN Matching Filter**: Estrazione solo righe con MRN corrispondente (no dati errati)
+- 🐛 **Fixed**: Estrazione multipla righe, MRN filtering, Shadow DOM date-time picker
+
 ## Caratteristiche
 
 - 🖥️ **Electron App** - Applicazione desktop nativa (Windows/Mac/Linux)

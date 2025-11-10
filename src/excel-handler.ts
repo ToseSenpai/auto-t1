@@ -219,6 +219,42 @@ export class ExcelHandler {
   }
 
   /**
+   * Scrive i dati estratti dalla tabella nella riga specificata
+   * Scrive nelle colonne B-I (lascia colonna A con MRN intatto)
+   * @param rowNumber Numero riga dove scrivere
+   * @param data Dati estratti dalla tabella
+   */
+  writeRowData(
+    rowNumber: number,
+    data: {
+      gruppoUtenti: string;
+      crn: string;
+      numeroRegistrazione: string;
+      stato: string;
+      statoOneriDoganali: string;
+      creatoIl: string;
+      modificatoIl: string;
+      nomeMessaggio: string;
+    }
+  ): void {
+    if (!this.worksheet) {
+      throw new Error("Worksheet non caricato");
+    }
+
+    // Mapping: campo → colonna Excel
+    this.writeCell(rowNumber, "B", data.gruppoUtenti); // Gruppo utenti
+    this.writeCell(rowNumber, "C", data.crn); // CRN
+    this.writeCell(rowNumber, "D", data.numeroRegistrazione); // Numero registrazione
+    this.writeCell(rowNumber, "E", data.stato); // Stato
+    this.writeCell(rowNumber, "F", data.statoOneriDoganali); // Stato oneri doganali
+    this.writeCell(rowNumber, "G", data.creatoIl); // Creato il
+    this.writeCell(rowNumber, "H", data.modificatoIl); // Modificato il
+    this.writeCell(rowNumber, "I", data.nomeMessaggio); // Nome messaggio
+
+    console.log(`✓ Dati scritti nella riga ${rowNumber} (colonne B-I)`);
+  }
+
+  /**
    * Converte numero colonna in lettera (1 -> A, 2 -> B, etc.)
    */
   private columnNumberToLetter(column: number): string {

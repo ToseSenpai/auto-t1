@@ -1,7 +1,7 @@
 # Auto-T1 - Stato Corrente Implementazione
 
 **Ultimo Aggiornamento**: 2025-11-10
-**Versione**: 1.0.1
+**Versione**: 1.1.0
 
 ---
 
@@ -143,6 +143,22 @@
 - [x] Status updates per ogni step automazione
 - [x] Messaggi differenziati per tipo (info/success/error)
 - [x] Completion summary con totale MRN elaborati
+
+### 14. MRN Search & Data Extraction (Parte 2) ✓
+- [x] **Settings Configuration**: Click bottone impostazioni (#editGrid)
+- [x] **Public Layout Filter**: Compilazione campo "STANDARD ST" con autocomplete
+- [x] **Apply Settings**: Click bottone Applica per confermare filtri
+- [x] **Date Range Automation**: Fill data inizio/fine (oggi - 1 mese → oggi)
+- [x] **MRN Search Field**: Compilazione campo ricerca MRN con valori da Excel
+- [x] **Find Button Click**: Automation click bottone "Trova" (#btnFind)
+- [x] **Table Results Extraction**: Estrazione dati da vaadin-grid con MRN matching
+- [x] **Table Header Extraction**: Estrazione titoli colonne da vaadin-grid-sorter
+- [x] **Multi-MRN Loop Processing**: Iterazione sequenziale su tutti MRN da Excel
+- [x] **Excel Writing**: Scrittura header + dati multipli con pattern Opzione A (righe consecutive)
+- [x] **MRN Filtering Strategy**: Match esatto campo "Numero registrazione" per filtrare risultati
+- [x] **Progress Tracking [X/Y]**: Progress real-time durante loop multi-MRN
+- [x] **Error Handling**: Skip MRN su errore e continua processing
+- [x] **Single Save**: Salvataggio Excel una volta alla fine del loop
 
 ---
 
@@ -289,7 +305,20 @@ _Nessun issue critico noto_
 
 ## 🔄 Changelog Recenti
 
-### 2025-11-10 - v1.0.1
+### 2025-11-10 - v1.1.0 (Parte 2 Completata)
+- ✨ **Settings Configuration Automation**: Click bottone impostazioni + compilazione Public Layout "STANDARD ST"
+- ✨ **Date Range Automation**: Fill automatico data inizio/fine (oggi - 1 mese → oggi)
+- ✨ **MRN Search Implementation**: Compilazione campo ricerca MRN + click bottone "Trova"
+- ✨ **Table Data Extraction**: Estrazione risultati da vaadin-grid con MRN matching strategy
+- ✨ **Table Header Extraction**: Estrazione titoli colonne da vaadin-grid-sorter elements
+- ✨ **Multi-MRN Loop Processing**: Iterazione sequenziale su tutti MRN con progress tracking [X/Y]
+- ✨ **Excel Writing Pattern**: Scrittura header + dati multipli su righe consecutive (Opzione A)
+- ✨ **MRN Filtering Strategy**: Match esatto su campo "Numero registrazione" per filtrare risultati corretti
+- 🐛 Fix estrazione multipla righe: count real rows + MRN matching per evitare righe extra
+- 📈 Single save optimization: salvataggio Excel una volta alla fine del loop
+- 📝 Documentazione completa Parte 2 (ADR, DECISIONS, README)
+
+### 2025-11-10 - v1.0.1 (Parte 1 Completata)
 - ✨ Implementato Multi-MRN Batch Processing (loop automatico su tutti gli MRN)
 - ✨ Aggiunto Shadow DOM date-time picker integration (fillArrivalDateTime)
 - ✨ Implementato clickSendButton() per invio dichiarazione

@@ -408,6 +408,306 @@ function setupIPCHandlers() {
   }
 });
 
+// Handler per check MRN posteriori (Parte 2)
+ipcMain.handle("automation:check-mrn-range", async (_: any, data: any) => {
+  try {
+    const { username, password, excelPath } = data;
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Avvio check MRN posteriori...",
+    });
+
+    // Inizializza WebAutomation e ExcelHandler
+    webAutomation = new WebAutomation(username, password);
+    excelHandler = new ExcelHandler(excelPath);
+
+    // Carica Excel
+    const excelLoaded = await excelHandler.load(false);
+    if (!excelLoaded) {
+      return { success: false, error: "File Excel non trovato o non caricabile" };
+    }
+
+    // Avvia browser
+    const browserStarted = await webAutomation.startBrowser();
+    if (!browserStarted) {
+      return { success: false, error: "Impossibile avviare il browser" };
+    }
+
+    // Login
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Login in corso...",
+    });
+
+    const loginSuccess = await webAutomation.login();
+    if (!loginSuccess) {
+      return { success: false, error: "Login fallito" };
+    }
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: "Login completato",
+    });
+
+    // Naviga a pagina Dichiarazioni
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Navigazione a pagina Dichiarazioni...",
+    });
+
+    const navSuccess = await webAutomation.navigateToDeclarations();
+    if (!navSuccess) {
+      return { success: false, error: "Impossibile navigare a Dichiarazioni" };
+    }
+
+    // Configurazione filtri visualizzazione (una tantum)
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Configurazione filtri visualizzazione...",
+    });
+
+    // 1. Click bottone Impostazioni
+    const settingsClicked = await webAutomation.clickSettingsButton();
+    if (!settingsClicked) {
+      return { success: false, error: "Impossibile aprire impostazioni" };
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 2. Compila campo "Public Layout" con "STANDARD ST"
+    const layoutFilled = await webAutomation.fillPublicLayout("STANDARD ST");
+    if (!layoutFilled) {
+      return { success: false, error: "Impossibile compilare Public Layout" };
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 3. Click bottone Applica
+    const applyClicked = await webAutomation.clickApplyButton();
+    if (!applyClicked) {
+      return { success: false, error: "Impossibile confermare impostazioni" };
+    }
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: "Filtri configurati correttamente",
+    });
+
+    // Attendi che il dialog si chiuda e la pagina si aggiorni
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Calcola date range: oggi - 1 mese → oggi
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 1);
+
+    // Formato YYYY-MM-DD per Vaadin date-picker
+    const formatDate = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const startDateStr = formatDate(startDate);
+    const endDateStr = formatDate(endDate);
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: `Compilazione date range: ${startDateStr} → ${endDateStr}`,
+    });
+
+    // Compila date picker START
+    const startFilled = await webAutomation.fillDateRangeStart(startDateStr);
+    if (!startFilled) {
+      return {
+        success: false,
+        error: "Impossibile compilare data inizio",
+      };
+    }
+
+    // Attendi 500ms tra i due date picker
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Compila date picker END
+    const endFilled = await webAutomation.fillDateRangeEnd(endDateStr);
+    if (!endFilled) {
+      return {
+        success: false,
+        error: "Impossibile compilare data fine",
+      };
+    }
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: "Date range compilato con successo",
+    });
+
+    // Estrai header dalla tabella e scrivi nella riga 1 dell'Excel
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Estrazione header tabella...",
+    });
+
+    const tableHeaders = await webAutomation.extractTableHeaders();
+    if (tableHeaders && tableHeaders.length > 0) {
+      // Scrivi "MRN" in A1
+      excelHandler.writeCell(1, "A", "MRN");
+
+      // Scrivi i titoli estratti nelle colonne B-I (max 8 colonne)
+      const columns = ["B", "C", "D", "E", "F", "G", "H", "I"];
+      for (let i = 0; i < Math.min(tableHeaders.length, 8); i++) {
+        excelHandler.writeCell(1, columns[i], tableHeaders[i]);
+      }
+
+      mainWindow?.webContents.send("automation:status", {
+        type: "success",
+        message: `✓ Header tabella scritti in Excel (${tableHeaders.length} colonne)`,
+      });
+    } else {
+      // Se non riesce a estrarre header, scrivi header di fallback
+      excelHandler.writeCell(1, "A", "MRN");
+      excelHandler.writeCell(1, "B", "Gruppo utenti");
+      excelHandler.writeCell(1, "C", "CRN");
+      excelHandler.writeCell(1, "D", "Numero registrazione");
+      excelHandler.writeCell(1, "E", "Stato");
+      excelHandler.writeCell(1, "F", "Stato oneri doganali");
+      excelHandler.writeCell(1, "G", "Creato il");
+      excelHandler.writeCell(1, "H", "Modificato il");
+      excelHandler.writeCell(1, "I", "Nome messaggio");
+
+      mainWindow?.webContents.send("automation:status", {
+        type: "warning",
+        message: "⚠ Impossibile estrarre header, usati header predefiniti",
+      });
+    }
+
+    // Leggi tutti gli MRN dalla colonna A del file Excel
+    let mrnValues: string[];
+    try {
+      mrnValues = excelHandler.readMRNColumn();
+      if (mrnValues.length === 0) {
+        return {
+          success: false,
+          error: "Nessun valore MRN trovato nella colonna A del file Excel",
+        };
+      }
+      console.log(`Trovati ${mrnValues.length} MRN da processare`);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Errore lettura MRN da Excel",
+      };
+    }
+
+    // Inizializza tracking riga Excel e contatori
+    let currentExcelRow = 2; // Prima riga dati (row 1 = header)
+    let totalResultsWritten = 0;
+    const totalMRNs = mrnValues.length;
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: `Inizio processing di ${totalMRNs} MRN...`,
+    });
+
+    // Loop su tutti gli MRN
+    for (let i = 0; i < mrnValues.length; i++) {
+      const currentMRN = mrnValues[i];
+      const mrnProgress = `[${i + 1}/${totalMRNs}]`;
+
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: `${mrnProgress} Processando MRN: ${currentMRN}`,
+      });
+
+      // Compila campo MRN ricerca
+      const mrnFilled = await webAutomation.fillSearchMRN(currentMRN);
+      if (!mrnFilled) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `${mrnProgress} Impossibile compilare campo MRN, skip...`,
+        });
+        continue; // Passa al prossimo MRN
+      }
+
+      // Click bottone "Trova" per cercare
+      const findClicked = await webAutomation.clickFindButton();
+      if (!findClicked) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `${mrnProgress} Impossibile cliccare bottone Trova, skip...`,
+        });
+        continue;
+      }
+
+      // Estrai risultati dalla tabella filtrando per MRN
+      const tableData = await webAutomation.extractTableResults(currentMRN);
+
+      if (!tableData || tableData.length === 0) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `${mrnProgress} Nessun risultato per MRN ${currentMRN}`,
+        });
+        // Continua al prossimo MRN
+        await new Promise(resolve => setTimeout(resolve, 500));
+        continue;
+      }
+
+      // Scrivi i dati estratti nelle righe successive
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: `${mrnProgress} Scrittura ${tableData.length} risultati per MRN ${currentMRN}...`,
+      });
+
+      for (const rowData of tableData) {
+        // Scrivi MRN in colonna A
+        excelHandler.writeCell(currentExcelRow, "A", currentMRN);
+
+        // Scrivi dati tabella in colonne B-I
+        excelHandler.writeRowData(currentExcelRow, rowData);
+
+        currentExcelRow++;
+        totalResultsWritten++;
+      }
+
+      mainWindow?.webContents.send("automation:status", {
+        type: "success",
+        message: `${mrnProgress} ✓ ${tableData.length} risultati scritti per MRN ${currentMRN}`,
+      });
+
+      // Pausa tra MRN per non sovraccaricare il sistema
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    // Salva il file Excel UNA VOLTA alla fine
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Salvataggio file Excel...",
+    });
+
+    const saved = await excelHandler.save();
+    if (!saved) {
+      return {
+        success: false,
+        error: "Impossibile salvare file Excel con risultati",
+      };
+    }
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: `✓ Completato! ${totalResultsWritten} risultati totali salvati in Excel (${totalMRNs} MRN processati)`,
+    });
+
+    return { success: true, count: totalResultsWritten };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore sconosciuto",
+    };
+  }
+});
+
 ipcMain.handle("automation:process-rows", async () => {
   try {
     if (!webAutomation || !excelHandler) {

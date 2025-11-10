@@ -1143,6 +1143,556 @@ export class WebAutomation {
   }
 
   /**
+   * Compila il date picker START per ricerca date range (id="dateFrom")
+   * @param dateString - Data in formato YYYY-MM-DD (es: "2025-10-10")
+   * @returns true se compilato con successo
+   */
+  async fillDateRangeStart(dateString: string): Promise<boolean> {
+    console.log(`Compilazione date range START: ${dateString}`);
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      const result = await this.page.evaluate(({ dateStr }) => {
+        // Trova il date picker con id="dateFrom"
+        const picker = document.querySelector('#dateFrom') as any;
+
+        if (!picker) {
+          return { success: false, error: "Date picker 'dateFrom' non trovato" };
+        }
+
+        // Strategia 1: Imposta valore direttamente
+        try {
+          picker.value = dateStr;
+          picker.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+          picker.dispatchEvent(new Event('value-changed', { bubbles: true, composed: true }));
+
+          if (picker.value === dateStr) {
+            return { success: true, value: picker.value, method: "direct" };
+          }
+        } catch (e) {
+          // Fallback
+        }
+
+        // Strategia 2: Accedi all'input interno nel Shadow DOM
+        try {
+          const textField = picker.shadowRoot?.querySelector('vaadin-date-picker-text-field') as any;
+          if (textField) {
+            const input = textField.shadowRoot?.querySelector('input[part="value"]') as HTMLInputElement;
+            if (input) {
+              input.value = dateStr;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+
+          picker.value = dateStr;
+          picker.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+
+          return { success: true, value: picker.value, method: "shadow-dom" };
+        } catch (shadowError) {
+          return {
+            success: false,
+            error: `Errore Shadow DOM: ${shadowError instanceof Error ? shadowError.message : String(shadowError)}`
+          };
+        }
+      }, { dateStr: dateString });
+
+      if (!result.success) {
+        console.error(`✗ ${result.error || "Errore compilazione date range START"}`);
+        await this.takeScreenshot("date_range_start_error");
+        return false;
+      }
+
+      console.log(`✓ Date range START compilato: ${result.value} (metodo: ${result.method})`);
+      return true;
+    } catch (error) {
+      console.error("Errore durante compilazione date range START:", error);
+      await this.takeScreenshot("date_range_start_exception");
+      return false;
+    }
+  }
+
+  /**
+   * Compila il date picker END per ricerca date range (id="dateTo")
+   * @param dateString - Data in formato YYYY-MM-DD (es: "2025-11-10")
+   * @returns true se compilato con successo
+   */
+  async fillDateRangeEnd(dateString: string): Promise<boolean> {
+    console.log(`Compilazione date range END: ${dateString}`);
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      const result = await this.page.evaluate(({ dateStr }) => {
+        // Trova il date picker con id="dateTo"
+        const picker = document.querySelector('#dateTo') as any;
+
+        if (!picker) {
+          return { success: false, error: "Date picker 'dateTo' non trovato" };
+        }
+
+        // Strategia 1: Imposta valore direttamente
+        try {
+          picker.value = dateStr;
+          picker.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+          picker.dispatchEvent(new Event('value-changed', { bubbles: true, composed: true }));
+
+          if (picker.value === dateStr) {
+            return { success: true, value: picker.value, method: "direct" };
+          }
+        } catch (e) {
+          // Fallback
+        }
+
+        // Strategia 2: Accedi all'input interno nel Shadow DOM
+        try {
+          const textField = picker.shadowRoot?.querySelector('vaadin-date-picker-text-field') as any;
+          if (textField) {
+            const input = textField.shadowRoot?.querySelector('input[part="value"]') as HTMLInputElement;
+            if (input) {
+              input.value = dateStr;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+
+          picker.value = dateStr;
+          picker.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+
+          return { success: true, value: picker.value, method: "shadow-dom" };
+        } catch (shadowError) {
+          return {
+            success: false,
+            error: `Errore Shadow DOM: ${shadowError instanceof Error ? shadowError.message : String(shadowError)}`
+          };
+        }
+      }, { dateStr: dateString });
+
+      if (!result.success) {
+        console.error(`✗ ${result.error || "Errore compilazione date range END"}`);
+        await this.takeScreenshot("date_range_end_error");
+        return false;
+      }
+
+      console.log(`✓ Date range END compilato: ${result.value} (metodo: ${result.method})`);
+      return true;
+    } catch (error) {
+      console.error("Errore durante compilazione date range END:", error);
+      await this.takeScreenshot("date_range_end_exception");
+      return false;
+    }
+  }
+
+  /**
+   * Compila il campo MRN per ricerca (id="ucr")
+   * @param mrnValue - Valore MRN da inserire
+   * @returns true se compilato con successo
+   */
+  async fillSearchMRN(mrnValue: string): Promise<boolean> {
+    console.log(`Compilazione campo MRN ricerca: ${mrnValue}`);
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      const result = await this.page.evaluate(({ mrn }) => {
+        // Trova il text field con id="ucr"
+        const textField = document.querySelector('#ucr') as any;
+
+        if (!textField) {
+          return { success: false, error: "Campo MRN 'ucr' non trovato" };
+        }
+
+        // Strategia 1: Imposta valore direttamente
+        try {
+          textField.value = mrn;
+          textField.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+          textField.dispatchEvent(new Event('value-changed', { bubbles: true, composed: true }));
+
+          if (textField.value === mrn) {
+            return { success: true, value: textField.value, method: "direct" };
+          }
+        } catch (e) {
+          // Fallback
+        }
+
+        // Strategia 2: Accedi all'input interno nel Shadow DOM
+        try {
+          const input = textField.shadowRoot?.querySelector('input[part="value"]') as HTMLInputElement;
+          if (input) {
+            input.value = mrn;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+
+          textField.value = mrn;
+          textField.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+
+          return { success: true, value: textField.value, method: "shadow-dom" };
+        } catch (shadowError) {
+          return {
+            success: false,
+            error: `Errore Shadow DOM: ${shadowError instanceof Error ? shadowError.message : String(shadowError)}`
+          };
+        }
+      }, { mrn: mrnValue });
+
+      if (!result.success) {
+        console.error(`✗ ${result.error || "Errore compilazione campo MRN"}`);
+        await this.takeScreenshot("mrn_field_search_error");
+        return false;
+      }
+
+      console.log(`✓ Campo MRN compilato: ${result.value} (metodo: ${result.method})`);
+      return true;
+    } catch (error) {
+      console.error("Errore durante compilazione campo MRN:", error);
+      await this.takeScreenshot("mrn_field_search_exception");
+      return false;
+    }
+  }
+
+  /**
+   * Click sul bottone Impostazioni (Settings) nella pagina Dichiarazioni
+   * @returns true se click eseguito con successo
+   */
+  async clickSettingsButton(): Promise<boolean> {
+    console.log("Click sul bottone Impostazioni...");
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      const button = this.page.locator("#editGrid");
+      await button.waitFor({ state: "visible", timeout: 10000 });
+      await button.click();
+
+      // Attendi che il dialog/modal delle impostazioni si apra
+      await this.page.waitForTimeout(1000);
+
+      console.log("✓ Bottone Impostazioni cliccato");
+      return true;
+    } catch (error) {
+      console.error("Errore durante click bottone Impostazioni:", error);
+      await this.takeScreenshot("settings_button_error");
+      return false;
+    }
+  }
+
+  /**
+   * Compila il campo "Public Layout" con un valore specifico
+   * @param value - Valore da inserire (es: "STANDARD ST")
+   * @returns true se compilato con successo
+   */
+  async fillPublicLayout(value: string): Promise<boolean> {
+    console.log(`Compilazione campo Public Layout: ${value}`);
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      // Usa locator chainato per attraversare Shadow DOM
+      // Selettore specifico: usa label="Public Layout" per disambiguare (ci sono 2 elementi con id="publicComboBox")
+      const comboBox = this.page.locator('#publicComboBox[label="Public Layout"]');
+      const inputLocator = comboBox.locator('input[part="value"]');
+
+      // Attendi che la combo-box sia visibile
+      await comboBox.waitFor({ state: "visible", timeout: 10000 });
+
+      // Click sulla combo-box per dare focus e aprire dropdown
+      await comboBox.click();
+      await this.page.waitForTimeout(300);
+
+      // Attendi che l'input sia visibile e accessibile
+      await inputLocator.waitFor({ state: "visible", timeout: 5000 });
+
+      // Click sull'input per assicurarsi che abbia focus
+      await inputLocator.click();
+
+      // Usa fill() che è il metodo standard Playwright (gestisce automaticamente clear)
+      await inputLocator.fill(value);
+
+      // Attendi che l'autocomplete processi l'input
+      await this.page.waitForTimeout(800);
+
+      // Press Enter per confermare la selezione dall'autocomplete
+      await inputLocator.press('Enter');
+      await this.page.waitForTimeout(300);
+
+      // Verifica che il valore sia stato impostato
+      const actualValue = await inputLocator.inputValue();
+      console.log(`Valore nel campo: "${actualValue}"`);
+
+      if (actualValue === value) {
+        console.log(`✓ Public Layout compilato correttamente: ${actualValue}`);
+        return true;
+      } else if (actualValue.includes(value)) {
+        console.log(`✓ Public Layout compilato (valore parziale): ${actualValue}`);
+        return true;
+      } else {
+        console.warn(`⚠ Valore impostato diverso: atteso="${value}", ottenuto="${actualValue}"`);
+        await this.takeScreenshot("public_layout_value_mismatch");
+        // Ritorna true comunque se c'è un valore (potrebbe essere normalizzato dal sistema)
+        return actualValue.length > 0;
+      }
+    } catch (error) {
+      console.error("Errore durante compilazione Public Layout:", error);
+      await this.takeScreenshot("public_layout_error");
+      return false;
+    }
+  }
+
+  /**
+   * Click sul bottone "Applica" (Apply) per confermare le impostazioni
+   * @returns true se click eseguito con successo
+   */
+  async clickApplyButton(): Promise<boolean> {
+    console.log("Click sul bottone Applica...");
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      const button = this.page.locator("#applyButtonOnWindow");
+      await button.waitFor({ state: "visible", timeout: 10000 });
+      await button.click();
+
+      // Attendi che il dialog si chiuda
+      await this.page.waitForTimeout(1000);
+
+      console.log("✓ Bottone Applica cliccato");
+      return true;
+    } catch (error) {
+      console.error("Errore durante click bottone Applica:", error);
+      await this.takeScreenshot("apply_button_error");
+      return false;
+    }
+  }
+
+  /**
+   * Click sul bottone "Trova" (Find) per cercare dichiarazioni
+   * @returns true se click eseguito con successo
+   */
+  async clickFindButton(): Promise<boolean> {
+    console.log("Click sul bottone Trova...");
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      const button = this.page.locator("#btnFind");
+      await button.waitFor({ state: "visible", timeout: 10000 });
+
+      // Verifica che il bottone sia enabled
+      const isEnabled = await button.isEnabled();
+      if (!isEnabled) {
+        console.warn("⚠ Bottone Trova disabilitato");
+        await this.takeScreenshot("find_button_disabled");
+        return false;
+      }
+
+      await button.click();
+
+      // Attendi che la ricerca venga eseguita e i risultati caricati
+      await this.page.waitForTimeout(2000);
+
+      console.log("✓ Bottone Trova cliccato, ricerca in corso...");
+      return true;
+    } catch (error) {
+      console.error("Errore durante click bottone Trova:", error);
+      await this.takeScreenshot("find_button_error");
+      return false;
+    }
+  }
+
+  /**
+   * Estrae i titoli delle colonne dalla tabella dichiarazioni
+   * @returns Array di 8 stringhe con i titoli delle colonne o null se errore
+   */
+  async extractTableHeaders(): Promise<string[] | null> {
+    console.log("Estrazione header dalla tabella...");
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return null;
+    }
+
+    try {
+      // Attendi che la tabella sia visibile
+      const grid = this.page.locator('#declarationGrid');
+      await grid.waitFor({ state: "visible", timeout: 10000 });
+
+      // Estrai i titoli dalle celle header
+      const headers = await this.page.evaluate(() => {
+        // Cerca elementi vaadin-grid-sorter che contengono i titoli
+        const sorters = document.querySelectorAll('#declarationGrid vaadin-grid-sorter');
+
+        if (sorters.length === 0) return null;
+
+        // Estrai il testo da ogni sorter (skippa checkbox e dettagli)
+        const headerTexts: string[] = [];
+        sorters.forEach((sorter) => {
+          const text = sorter.textContent?.trim() || '';
+          if (text) {
+            headerTexts.push(text);
+          }
+        });
+
+        // Dovremmo avere 8 header per le colonne dati
+        return headerTexts.length > 0 ? headerTexts : null;
+      });
+
+      if (!headers || headers.length === 0) {
+        console.warn("⚠ Nessun header trovato nella tabella");
+        return null;
+      }
+
+      console.log(`✓ ${headers.length} header estratti dalla tabella:`);
+      headers.forEach((header, idx) => {
+        console.log(`  Col${idx}: ${header}`);
+      });
+
+      return headers;
+    } catch (error) {
+      console.error("Errore durante estrazione header tabella:", error);
+      await this.takeScreenshot("table_headers_error");
+      return null;
+    }
+  }
+
+  /**
+   * Estrae i risultati dalla tabella dichiarazioni filtrando per MRN
+   * @param searchedMRN MRN da cercare nella colonna "Numero registrazione"
+   * @returns Array con i dati estratti che matchano l'MRN o null se nessun risultato
+   */
+  async extractTableResults(searchedMRN: string): Promise<Array<{
+    gruppoUtenti: string;
+    crn: string;
+    numeroRegistrazione: string;
+    stato: string;
+    statoOneriDoganali: string;
+    creatoIl: string;
+    modificatoIl: string;
+    nomeMessaggio: string;
+  }> | null> {
+    console.log(`Estrazione risultati dalla tabella per MRN: ${searchedMRN}`);
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return null;
+    }
+
+    try {
+      // Attendi che la tabella sia visibile
+      const grid = this.page.locator('#declarationGrid');
+      await grid.waitFor({ state: "visible", timeout: 10000 });
+
+      // Attendi che ci siano risultati (almeno una riga nel tbody)
+      await this.page.waitForTimeout(1000);
+
+      // Estrai solo le righe che matchano l'MRN cercato
+      const results = await this.page.evaluate((mrn: string) => {
+        const grid = document.querySelector('#declarationGrid') as any;
+        if (!grid) return null;
+
+        // Helper per verificare se una cella esiste ed ha contenuto
+        const getCellElement = (index: number): Element | null => {
+          return document.querySelector(`vaadin-grid-cell-content[slot="vaadin-grid-cell-content-${index}"]`);
+        };
+
+        const getCellText = (index: number): string => {
+          const cell = getCellElement(index);
+          return cell?.textContent?.trim() || '';
+        };
+
+        // Itera su max 10 righe e filtra per MRN matching
+        // Ogni riga ha 10 celle (0=checkbox, 1=dettagli, 2-9=dati)
+        // Prima riga: slot 2-9, seconda riga: slot 12-19, terza: slot 22-29, ecc.
+        const matchedResults: Array<{
+          gruppoUtenti: string;
+          crn: string;
+          numeroRegistrazione: string;
+          stato: string;
+          statoOneriDoganali: string;
+          creatoIl: string;
+          modificatoIl: string;
+          nomeMessaggio: string;
+        }> = [];
+
+        for (let rowIndex = 0; rowIndex < 10; rowIndex++) {
+          const baseIndex = rowIndex * 10 + 2;
+
+          // Verifica che la riga esista controllando prima cella
+          const firstCell = getCellElement(baseIndex);
+          if (!firstCell) break; // Nessuna altra riga
+
+          // Leggi "Numero registrazione" (col2 = baseIndex + 2)
+          const numeroRegistrazione = getCellText(baseIndex + 2);
+
+          // Se non ha contenuto, potrebbe essere fine tabella
+          if (!numeroRegistrazione) break;
+
+          // Verifica match con MRN cercato
+          if (numeroRegistrazione === mrn) {
+            // Match trovato! Estrai tutta la riga
+            matchedResults.push({
+              gruppoUtenti: getCellText(baseIndex),       // col0 - Gruppo utenti
+              crn: getCellText(baseIndex + 1),            // col1 - CRN
+              numeroRegistrazione: numeroRegistrazione,   // col2 - Numero registrazione
+              stato: getCellText(baseIndex + 3),          // col3 - Stato
+              statoOneriDoganali: getCellText(baseIndex + 4), // col4 - Stato oneri doganali
+              creatoIl: getCellText(baseIndex + 5),       // col5 - Creato il
+              modificatoIl: getCellText(baseIndex + 6),   // col6 - Modificato il
+              nomeMessaggio: getCellText(baseIndex + 7),  // col7 - Nome messaggio
+            });
+          }
+          // Se no match, continua a cercare nella riga successiva
+        }
+
+        return matchedResults.length > 0 ? matchedResults : null;
+      }, searchedMRN);
+
+      if (!results || results.length === 0) {
+        console.warn(`⚠ Nessuna riga con MRN "${searchedMRN}" trovata nella tabella`);
+        await this.takeScreenshot("table_no_results");
+        return null;
+      }
+
+      console.log(`✓ ${results.length} righe con MRN "${searchedMRN}" estratte dalla tabella:`);
+      results.forEach((row, idx) => {
+        console.log(`  Riga ${idx + 1}:`);
+        console.log(`    - Gruppo utenti: ${row.gruppoUtenti}`);
+        console.log(`    - CRN: ${row.crn}`);
+        console.log(`    - Numero registrazione: ${row.numeroRegistrazione}`);
+        console.log(`    - Stato: ${row.stato}`);
+      });
+
+      return results;
+    } catch (error) {
+      console.error("Errore durante estrazione risultati tabella:", error);
+      await this.takeScreenshot("table_extraction_error");
+      return null;
+    }
+  }
+
+  /**
    * Getter per verificare se l'utente è loggato
    */
   get loggedIn(): boolean {

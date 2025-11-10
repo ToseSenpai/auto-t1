@@ -628,6 +628,150 @@ if (mrnIndex < totalMRNs - 1) {
 
 ---
 
+## ADR-018: MRN Filtering Strategy in Table Extraction
+
+**Date**: 2025-11-10
+**Status**: ✅ Accepted
+**Context**: Parte 2 Implementation
+
+### Problema
+
+Estrazione risultati da tabella vaadin-grid deve filtrare SOLO le righe relative all'MRN cercato, evitando di estrarre dati non correlati o righe vuote.
+
+### Decisione
+
+**Implementare MRN matching strategy**:
+
+1. **Parametrizzare `extractTableResults(searchedMRN: string)`**: Passare MRN da cercare come parametro
+2. **Iterare su max 10 righe** della tabella (limite ragionevole)
+3. **Per ogni riga**: Leggere campo "Numero registrazione" (col2, slot baseIndex + 2)
+4. **Match esatto**: `numeroRegistrazione === searchedMRN`
+5. **Se match**: Estrarre tutta la riga e aggiungerla ai risultati
+6. **Se no match**: Skip riga e continua
+
+```typescript
+for (let rowIndex = 0; rowIndex < 10; rowIndex++) {
+  const numeroRegistrazione = getCellText(baseIndex + 2);
+  if (numeroRegistrazione === mrn) {
+    matchedResults.push({ ...rowData });
+  }
+}
+```
+
+### Conseguenze
+
+**Positive**:
+- ✅ Filtra esattamente le righe con MRN corrispondente
+- ✅ Ignora righe con altri MRN o dati non correlati
+- ✅ Robusto: non dipende dalla posizione delle righe
+- ✅ Scalabile: funziona anche se ci sono più risultati per lo stesso MRN
+- ✅ Previene errori di estrazione dati errati
+
+**Negative**:
+- ❌ Richiede parametro aggiuntivo al metodo
+- ❌ Limitato a max 10 righe (sufficiente per use case)
+
+### Alternative Considerate
+1. **Contare righe reali**: Troppo fragile, celle vuote possono avere spazi
+2. **Estrarre tutte le righe**: Rischio di dati non correlati nel file Excel
+
+---
+
+## ADR-019: Excel Writing Pattern (Opzione A - Consecutive Rows)
+
+**Date**: 2025-11-10
+**Status**: ✅ Accepted
+**Context**: Parte 2 Implementation
+
+### Problema
+
+Con multiple righe di risultati per ogni MRN, serve definire come scrivere i dati nell'Excel:
+- Sovrascrivere MRN originali?
+- Mantenere MRN originali e scrivere altrove?
+- Come gestire spacing?
+
+### Decisione
+
+**Adottare Opzione A - Consecutive Rows Pattern**:
+
+1. **Header in riga 1**: MRN + titoli colonne estratti da tabella
+2. **Dati dalla riga 2**: Iniziare a scrivere dalla prima riga dati
+3. **Per ogni MRN**:
+   - Per ogni risultato estratto: scrivere MRN in col A + dati in col B-I
+   - Incrementare `currentExcelRow++` dopo ogni scrittura
+4. **Risultato**: Righe consecutive senza gap, MRN ripetuti per ogni risultato
+
+**Esempio**:
+```
+Riga 1: MRN | Gruppo utenti | CRN | ...  (HEADER)
+Riga 2: 25IT...0016323 | IT.ALL | ... | ...
+Riga 3: 25IT...0016323 | IT.ALL | ... | ...  (stesso MRN, risultato diverso)
+Riga 4: 25IT...0016324 | IT.ALL | ... | ...
+```
+
+### Conseguenze
+
+**Positive**:
+- ✅ Formato Excel chiaro e compatto
+- ✅ Facile da processare (no gap, no logica complessa)
+- ✅ MRN sempre in colonna A (facile da filtrare in Excel)
+- ✅ Ogni riga è autocontenuta (MRN + dati completi)
+- ✅ Scalabile: funziona con qualsiasi numero di risultati
+
+**Negative**:
+- ❌ MRN originali vengono sovrascritti (ma sono già nel file input)
+- ❌ Ripetizione MRN in ogni riga (ma è intenzionale per chiarezza)
+
+### Alternative Considerate
+1. **Opzione B** (Mantieni MRN originali, risultati separati): Complesso, Excel più grande
+2. **Opzione C** (Colonne aggiuntive): Limitato a numero fisso di risultati per MRN
+
+---
+
+## ADR-020: Table Header Extraction from Vaadin Grid
+
+**Date**: 2025-11-10
+**Status**: ✅ Accepted
+**Context**: Parte 2 Implementation
+
+### Problema
+
+Excel output ha bisogno di header colonne per dare contesto ai dati estratti. Header devono corrispondere esattamente ai titoli della tabella web.
+
+### Decisione
+
+**Estrarre header dinamicamente da vaadin-grid elements**:
+
+1. **Cercare `<vaadin-grid-sorter>` elements**: Contengono i titoli cliccabili delle colonne
+2. **Estrarre textContent**: Testo visibile di ogni sorter
+3. **Scrivere in riga 1 Excel**: A1="MRN", B1-I1=titoli estratti
+4. **Fallback se estrazione fallisce**: Usare header predefiniti hardcoded
+
+```typescript
+const sorters = document.querySelectorAll('#declarationGrid vaadin-grid-sorter');
+const headers = Array.from(sorters).map(s => s.textContent?.trim() || '');
+```
+
+### Conseguenze
+
+**Positive**:
+- ✅ Header sempre sincronizzati con tabella web
+- ✅ Se tabella cambia, header si aggiornano automaticamente
+- ✅ Formato Excel professionale con contesto chiaro
+- ✅ Fallback garantisce sempre header (anche se estrazione fallisce)
+- ✅ Facile da leggere per utenti finali
+
+**Negative**:
+- ❌ Dipendenza da struttura DOM Vaadin (se cambia, può rompersi)
+- ❌ Extra step nel workflow (estrazione header prima del loop)
+
+### Alternative Considerate
+1. **Header hardcoded**: Semplice ma rischio disallineamento con tabella
+2. **Nessun header**: Excel poco usabile, dati senza contesto
+3. **Header da Excel input**: Non garantisce match con dati estratti
+
+---
+
 ## 📝 Decision Process
 
 ### Come Aggiungiamo Nuove Decisioni
@@ -657,7 +801,12 @@ if (mrnIndex < totalMRNs - 1) {
 
 ## 🔄 Changelog Decisioni
 
-### 2025-11-10
+### 2025-11-10 (Parte 2)
+- ✅ Aggiunti ADR-018: MRN Filtering Strategy in Table Extraction
+- ✅ Aggiunti ADR-019: Excel Writing Pattern (Opzione A - Consecutive Rows)
+- ✅ Aggiunti ADR-020: Table Header Extraction from Vaadin Grid
+
+### 2025-11-10 (Parte 1)
 - ✅ Aggiunti ADR-014: Shadow DOM Access Strategy
 - ✅ Aggiunti ADR-015: Multi-MRN Loop Architecture
 - ✅ Aggiunti ADR-016: Progress Tracking Format [X/Y]

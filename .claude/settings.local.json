@@ -1,22 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir:*)",
-      "Bash(tree:*)",
-      "Bash(git -C /c/Users/itose/auto-t1 log --oneline -5)",
-      "Bash(git -C /c/Users/itose/auto-t1 config --local user.name)",
-      "Bash(cat:*)",
-      "Bash(data.gitkeep)",
-      "Bash(logs.gitkeep)",
-      "Bash(curl:*)",
-      "Bash(npm run compile:*)",
-      "Bash(npm run electron:dev:*)",
-      "Bash(echo:*)",
-      "Bash(unset:*)",
-      "Bash(node -e:*)",
-      "Bash(tasklist:*)",
-      "Bash(findstr:*)",
-      "Bash(git add:*)"
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: ✨ Implementato Multi-MRN batch processing e Shadow DOM integration\n\nImplementazioni Parte 1 completate:\n\n- ✨ Multi-MRN loop processing: processa automaticamente tutti gli MRN dal file Excel\n- ✨ Shadow DOM date-time picker: fix fillArrivalDateTime() con strategie multiple\n- ✨ Send button automation: implementato clickSendButton() per invio dichiarazione\n- ✨ Progress tracking [X/Y]: feedback real-time per MRN correnti/totali\n- ✨ Reset automatico: torna a \"Nuova dichiarazione\" tra MRN\n\nModifiche tecniche:\n- electron/main.ts: loop FOR su tutti gli MRN con progress tracking\n- src/web-automation.ts: fillArrivalDateTime() con Shadow DOM access, clickSendButton()\n- docs/: aggiornata documentazione completa (CURRENT_STATUS, PROJECT_CONTEXT, DECISIONS, QUICK_REFERENCE)\n- README.md: sezione nuove features v1.0.1\n\nADR aggiunti:\n- ADR-014: Shadow DOM Access Strategy for Vaadin Components\n- ADR-015: Multi-MRN Loop Architecture\n- ADR-016: Progress Tracking Format [X/Y]\n- ADR-017: Reset Mechanism Between MRN Submissions\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
