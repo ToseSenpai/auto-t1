@@ -38,12 +38,12 @@ function App() {
   }, [addLog, setProgress]);
 
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-100">
-      {/* Sidebar - 350px fisso */}
+    <div className="flex h-screen bg-gradient-to-br from-dark-950 via-gray-900 to-dark-900 text-gray-100 overflow-hidden">
+      {/* Sidebar - 380px fisso */}
       <Sidebar />
 
-      {/* Browser View Area - ora gestita da webview tag */}
-      <div className="flex-1 relative bg-gray-800">
+      {/* Browser View Area - Modern gradient background */}
+      <div className="flex-1 relative bg-gradient-to-br from-gray-800 via-dark-850 to-gray-900 shadow-inner">
         <WebView initialUrl="about:blank" />
       </div>
     </div>

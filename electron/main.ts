@@ -3,7 +3,7 @@
  * Processo principale che gestisce finestra, browser view e comunicazione IPC
  */
 
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
 const { join, basename } = require("path");
 
 import { WebAutomation } from "../src/web-automation";
@@ -26,7 +26,7 @@ function createSplashWindow() {
     alwaysOnTop: true,
     resizable: false,
     center: true,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#0a0c0f", // Dark-950 matching splash screen gradient
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -57,6 +57,9 @@ function createWindow() {
     backgroundColor: "#1f2937",
   });
 
+  // Rimuovi la barra del menu (File, Edit, View, Window, Help)
+  Menu.setApplicationMenu(null);
+
   // Carica l'app React
   if (isDev) {
     mainWindow!.loadURL("http://localhost:5173");
@@ -81,10 +84,10 @@ function createWindow() {
         mainWindow.show();
         mainWindow.focus();
 
-        // Apri DevTools solo in dev
-        if (isDev) {
-          mainWindow.webContents.openDevTools();
-        }
+        // DevTools disabilitati per UI pulita - usa Ctrl+Shift+I se necessario
+        // if (isDev) {
+        //   mainWindow.webContents.openDevTools();
+        // }
       }
     }, 5000); // 5 secondi minimi splash
   });
@@ -102,9 +105,10 @@ function createWindow() {
       mainWindow.show();
       mainWindow.focus();
 
-      if (isDev) {
-        mainWindow.webContents.openDevTools();
-      }
+      // DevTools disabilitati per UI pulita - usa Ctrl+Shift+I se necessario
+      // if (isDev) {
+      //   mainWindow.webContents.openDevTools();
+      // }
     }
   }, 10000); // 10 secondi fallback
 

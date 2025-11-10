@@ -111,8 +111,8 @@ function Controls() {
   };
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+    <div className="space-y-4">
+      <h2 className="text-sm font-semibold text-gray-200 tracking-tight">
         Controlli
       </h2>
 
@@ -121,10 +121,10 @@ function Controls() {
         <button
           onClick={handleSelectFile}
           disabled={isRunning}
-          className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+          className="group w-full px-3 py-2 bg-gradient-to-br from-accent-green to-green-700 hover:from-green-600 hover:to-green-800 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed rounded-lg text-xs font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-2 transition-all"
         >
           <svg
-            className="w-4 h-4"
+            className="w-4 h-4 group-hover:scale-110 transition-transform"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -138,62 +138,64 @@ function Controls() {
           </svg>
           Seleziona File Excel
         </button>
-        <p className="text-xs text-gray-400 text-center truncate">
-          {getFileName()}
-        </p>
+        <div className="px-2 py-1.5 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50">
+          <p className="text-[10px] text-gray-300 text-center truncate">
+            {getFileName()}
+          </p>
+        </div>
       </div>
 
       <div className="flex gap-2">
         {!isRunning ? (
           <button
             onClick={handleStart}
-            className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            className="group flex-1 px-3 py-2 bg-gradient-to-br from-accent-blue to-blue-700 hover:from-blue-600 hover:to-blue-800 rounded-lg text-xs font-medium shadow-soft hover:shadow-glow-blue active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4 h-4 group-hover:scale-110 transition-transform"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
               <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
             </svg>
-            Start
+            Avvia
           </button>
         ) : (
           <>
             <button
               onClick={() => pauseAutomation()}
-              className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              className="group flex-1 px-3 py-2 bg-gradient-to-br from-yellow-500 to-yellow-700 hover:from-yellow-600 hover:to-yellow-800 rounded-lg text-xs font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
             >
               {isPaused ? (
                 <>
                   <svg
-                    className="w-4 h-4"
+                    className="w-4 h-4 group-hover:scale-110 transition-transform"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
                     <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                   </svg>
-                  Resume
+                  Riprendi
                 </>
               ) : (
                 <>
                   <svg
-                    className="w-4 h-4"
+                    className="w-4 h-4 group-hover:scale-110 transition-transform"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
                     <path d="M5.5 3.5A1.5 1.5 0 017 5v10a1.5 1.5 0 01-3 0V5a1.5 1.5 0 011.5-1.5zM13 3.5A1.5 1.5 0 0114.5 5v10a1.5 1.5 0 01-3 0V5A1.5 1.5 0 0113 3.5z" />
                   </svg>
-                  Pause
+                  Pausa
                 </>
               )}
             </button>
             <button
               onClick={handleStop}
-              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              className="group flex-1 px-3 py-2 bg-gradient-to-br from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 rounded-lg text-xs font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
             >
               <svg
-                className="w-4 h-4"
+                className="w-4 h-4 group-hover:scale-110 transition-transform"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -206,14 +208,14 @@ function Controls() {
       </div>
 
       {/* Separator */}
-      <div className="border-t border-gray-700 pt-3">
+      <div className="border-t border-gray-700/50 pt-4">
         <button
           onClick={handleCheckMRN}
           disabled={isRunning}
-          className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+          className="group w-full px-3 py-2 bg-gradient-to-br from-accent-orange to-orange-700 hover:from-orange-600 hover:to-orange-800 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed rounded-lg text-xs font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-2 transition-all"
         >
           <svg
-            className="w-4 h-4"
+            className="w-4 h-4 group-hover:scale-110 transition-transform"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -227,8 +229,8 @@ function Controls() {
           </svg>
           Check MRN Posteriori
         </button>
-        <p className="text-xs text-gray-400 text-center mt-1">
-          Cerca dichiarazioni ultimi 30 giorni
+        <p className="text-[10px] text-gray-400 text-center mt-2">
+          Cerca dichiarazioni negli ultimi 30 giorni
         </p>
       </div>
     </div>
