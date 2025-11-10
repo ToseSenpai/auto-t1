@@ -336,6 +336,30 @@ Apri `chrome://inspect` nel browser.
 | **Vaadin/DOM** | JavaScript via string | Nativo, type-safe |
 | **Deployment** | Interprete Python | Node.js (più comune) |
 
+## 🆕 Nuove Features v1.0.1 (2025-11-10)
+
+### Multi-MRN Batch Processing
+Il sistema ora processa **automaticamente tutti gli MRN** dal file Excel in un unico ciclo:
+- ✅ Loop sequenziale su tutti gli MRN (non solo il primo)
+- ✅ Progress tracking real-time con formato `[X/Y]` (es: `[3/5]`)
+- ✅ Reset automatico tra MRN (torna a "Nuova dichiarazione")
+- ✅ Logging dettagliato per ogni MRN processato
+
+### Shadow DOM Integration
+Implementato accesso ai componenti Vaadin con Shadow DOM:
+- ✅ Fix `fillArrivalDateTime()` per date-time picker Vaadin
+- ✅ Strategia multi-fallback per compatibilità
+- ✅ Calcolo automatico data/ora corrente + 1 ora
+- ✅ Gestione formato ISO 8601 (YYYY-MM-DDTHH:MM)
+
+### Send Button Automation
+- ✅ Implementato `clickSendButton()` per invio dichiarazione
+- ✅ Verifica stato bottone (enabled/disabled)
+- ✅ Screenshot post-click per conferma
+- ✅ Error handling completo
+
+**Comando Electron**: `npm run electron:dev`
+
 ## Prossimi passi
 
 1. Installa dipendenze: `npm install`

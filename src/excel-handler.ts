@@ -179,6 +179,46 @@ export class ExcelHandler {
   }
 
   /**
+   * Legge tutti i valori MRN dalla colonna A
+   * Assume che l'header "MRN" sia nella riga 1, colonna A
+   * @returns Array di valori MRN (stringa)
+   */
+  readMRNColumn(): string[] {
+    if (!this.worksheet) {
+      throw new Error("Worksheet non caricato");
+    }
+
+    const mrnValues: string[] = [];
+    const dataStartRow = Config.EXCEL_CONFIG.dataStartRow;
+
+    // Verifica che l'header in A1 sia "MRN"
+    const headerCell = this.worksheet.getCell("A1");
+    const headerValue = headerCell.value?.toString().trim().toUpperCase();
+
+    if (headerValue !== "MRN") {
+      throw new Error(
+        `Colonna A non contiene header "MRN". Trovato: "${headerCell.value}"`
+      );
+    }
+
+    // Leggi tutti i valori dalla colonna A partendo dalla riga dati
+    const maxRow = this.worksheet.rowCount;
+
+    for (let rowNum = dataStartRow; rowNum <= maxRow; rowNum++) {
+      const cell = this.worksheet.getCell(`A${rowNum}`);
+      const value = cell.value;
+
+      // Aggiungi solo valori non vuoti
+      if (value !== null && value !== undefined && value !== "") {
+        mrnValues.push(String(value).trim());
+      }
+    }
+
+    console.log(`Letti ${mrnValues.length} valori MRN dalla colonna A`);
+    return mrnValues;
+  }
+
+  /**
    * Converte numero colonna in lettera (1 -> A, 2 -> B, etc.)
    */
   private columnNumberToLetter(column: number): string {

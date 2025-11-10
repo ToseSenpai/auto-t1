@@ -461,6 +461,173 @@ docs(readme): 📝 Update installation guide
 
 ---
 
+## ADR-014: Shadow DOM Access Strategy for Vaadin Components
+
+**Data**: 2025-11-10
+**Status**: ✅ Accepted
+
+### Contesto
+I componenti Vaadin (date-time-picker, combo-box, text-field) utilizzano Shadow DOM per incapsulamento, rendendo impossibile l'accesso diretto agli input HTML interni tramite selettori CSS standard. Necessità di compilare il campo data/ora arrivo nel form dichiarazione.
+
+### Decisione
+Implementare **strategia multi-fallback** per accedere e compilare componenti Vaadin in Shadow DOM:
+
+1. **Strategia diretta**: Tentare setter su componente principale (`picker.value = dateTime`)
+2. **Strategia Shadow DOM**: Se fallisce, navigare nel Shadow DOM per accedere a input interni
+   - Trovare `date-picker` e `time-picker` con `querySelector('[slot="date-picker"]')`
+   - Accedere a `shadowRoot` di ogni componente
+   - Impostare valori separatamente (data e ora)
+   - Dispatchare eventi (`change`, `blur`) per validazione
+
+### Conseguenze
+
+**Positive**:
+- ✅ Funziona con diversi versioni Vaadin (fallback garantisce compatibilità)
+- ✅ Codice resilient a cambiamenti DOM structure
+- ✅ Logging dettagliato per debugging
+- ✅ Screenshot diagnostici per ogni tentativo
+
+**Negative**:
+- ❌ Codice più complesso rispetto a selettore semplice
+- ❌ Dipendenza da struttura interna Shadow DOM (può cambiare con Vaadin updates)
+- ❌ Performance leggermente inferiore (multiple tentativi)
+
+### Alternative Considerate
+1. **Solo strategia diretta**: Non funziona con tutti i componenti Vaadin
+2. **Solo Shadow DOM**: Più complesso e potrebbe non servire per componenti futuri
+3. **CDP (Chrome DevTools Protocol)**: Troppo complesso, overkill per questo caso
+
+---
+
+## ADR-015: Multi-MRN Loop Architecture
+
+**Data**: 2025-11-10
+**Status**: ✅ Accepted
+
+### Contesto
+Il sistema legge tutti gli MRN dal file Excel ma processava solo il primo (indice 0). Necessità di automatizzare il processamento di **tutti** gli MRN in batch per ridurre intervento manuale.
+
+### Decisione
+Implementare **loop sequenziale** in `electron/main.ts` handler `automation:start`:
+
+```typescript
+for (let mrnIndex = 0; mrnIndex < totalMRNs; mrnIndex++) {
+  const currentMRN = mrnValues[mrnIndex];
+
+  // 1. Processa dichiarazione per currentMRN
+  // 2. Invia (clickSendButton)
+  // 3. SE non ultimo: reset a "Nuova dichiarazione"
+}
+```
+
+**Architettura**:
+- **Common setup** (1 volta): Login → Navigate Dichiarazioni → Click "Nuova dichiarazione"
+- **Loop body** (N volte): NCTS → MX DHL → OK → Fill MRN → Fill Date/Time → Send
+- **Reset tra MRN**: Auto-redirect + wait 2s + clickNewDeclaration()
+
+### Conseguenze
+
+**Positive**:
+- ✅ Zero intervento manuale per batch di N MRN
+- ✅ Scalabile (funziona con 1, 10, 100+ MRN)
+- ✅ Progress tracking visibile ([X/Y])
+- ✅ Error handling per singolo MRN (può continuare)
+
+**Negative**:
+- ❌ Processing sequenziale (non parallelo) → più lento
+- ❌ Se crash a metà, perde stato (no resume da MRN N)
+- ❌ Memory leak potenziale se loop molto lungo (browser restart?)
+
+### Alternative Considerate
+1. **Processing parallelo**: Troppo complesso, race conditions, server potrebbe bloccare
+2. **Batch manuale** (user clicca Start per ogni MRN): Tedioso, no automation value
+3. **Queue system** con resume: Overengineering per v1.0
+
+---
+
+## ADR-016: Progress Tracking Format [X/Y]
+
+**Data**: 2025-11-10
+**Status**: ✅ Accepted
+
+### Contesto
+Con multi-MRN processing, l'utente perde visibilità su quale MRN è in elaborazione e quanti ne restano. Necessità di feedback real-time chiaro.
+
+### Decisione
+Adottare formato **[X/Y]** per progress tracking:
+
+- **X**: Indice MRN corrente (1-based: `mrnIndex + 1`)
+- **Y**: Totale MRN da processare (`totalMRNs`)
+- **Formato**: `[2/5]` → "2° MRN su 5 totali"
+
+**Implementazione**:
+```typescript
+const mrnProgress = `[${mrnIndex + 1}/${totalMRNs}]`;
+// Ogni messaggio IPC include prefix: "[2/5] Click su NCTS..."
+```
+
+### Conseguenze
+
+**Positive**:
+- ✅ Immediatamente comprensibile (visual familiarity con pagination)
+- ✅ Poco spazio UI (5-10 caratteri)
+- ✅ Facile parsing per progress bar (X/Y * 100%)
+- ✅ Universale (no i18n necessario, numeri sono universali)
+
+**Negative**:
+- ❌ Non mostra ETA (estimated time remaining)
+- ❌ Non mostra velocità processing (MRN/min)
+
+### Alternative Considerate
+1. **Percentage** (`"40% completato"`): Meno preciso per capire "quanti restano"
+2. **Verbose** (`"Processamento MRN 2 di 5"`): Occupa più spazio
+3. **Progress bar only**: No feedback testuale, meno chiaro
+
+---
+
+## ADR-017: Reset Mechanism Between MRN Submissions
+
+**Data**: 2025-11-10
+**Status**: ✅ Accepted
+
+### Contesto
+Dopo `clickSendButton()`, il sistema deve tornare a "Nuova dichiarazione" per processare il prossimo MRN. Il sito reindirizza automaticamente a `/cm/declarations` dopo submit, ma serve click manuale su "Nuova dichiarazione".
+
+### Decisione
+Implementare **reset automatico** con:
+
+1. **Auto-redirect handling**: Il sistema reindirizza automaticamente (no action needed)
+2. **Wait stabilization**: `await new Promise(resolve => setTimeout(resolve, 2000))` per dare tempo al redirect
+3. **Click "Nuova dichiarazione"**: Riutilizzare metodo `clickNewDeclaration()` esistente
+4. **Conditional**: Solo se `mrnIndex < totalMRNs - 1` (skip per ultimo MRN)
+
+```typescript
+if (mrnIndex < totalMRNs - 1) {
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  await webAutomation.clickNewDeclaration();
+}
+```
+
+### Conseguenze
+
+**Positive**:
+- ✅ Zero intervento manuale tra MRN
+- ✅ Riutilizza codice esistente (`clickNewDeclaration`)
+- ✅ Timeout configurabile (può aumentare se server lento)
+- ✅ Skip per ultimo MRN (risparmia tempo)
+
+**Negative**:
+- ❌ Fixed timeout 2s potrebbe essere insufficiente su reti lente
+- ❌ Fixed timeout potrebbe essere eccessivo su reti veloci (spreca tempo)
+- ❌ Se redirect fallisce silenziosamente, loop si blocca
+
+### Alternative Considerate
+1. **Wait for URL** (`page.waitForURL('/cm/declarations')`): Più affidabile ma complesso
+2. **Polling visibility** bottone "Nuova dichiarazione": Overkill, il redirect è sempre consistente
+3. **Manual reset** (user clicca "Next"): Annulla automation benefit
+
+---
+
 ## 📝 Decision Process
 
 ### Come Aggiungiamo Nuove Decisioni
@@ -489,6 +656,12 @@ docs(readme): 📝 Update installation guide
 ---
 
 ## 🔄 Changelog Decisioni
+
+### 2025-11-10
+- ✅ Aggiunti ADR-014: Shadow DOM Access Strategy
+- ✅ Aggiunti ADR-015: Multi-MRN Loop Architecture
+- ✅ Aggiunti ADR-016: Progress Tracking Format [X/Y]
+- ✅ Aggiunti ADR-017: Reset Mechanism Between MRN Submissions
 
 ### 2025-11-07
 - ✅ Creato documento DECISIONS.md

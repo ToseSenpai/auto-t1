@@ -1,7 +1,7 @@
 # Auto-T1 - Stato Corrente Implementazione
 
-**Ultimo Aggiornamento**: 2025-11-07
-**Versione**: 1.0.0
+**Ultimo Aggiornamento**: 2025-11-10
+**Versione**: 1.0.1
 
 ---
 
@@ -105,6 +105,44 @@
 - [x] docs/PROJECT_CONTEXT.md (architettura)
 - [x] docs/CURRENT_STATUS.md (questo file)
 - [x] Inline code comments
+
+### 10. Multi-MRN Batch Processing ✓
+- [x] Loop su tutti gli MRN dal file Excel
+- [x] Processing sequenziale per ogni riga
+- [x] Progress tracking formato [X/Y] durante esecuzione
+- [x] Reset automatico tra MRN (torna a "Nuova dichiarazione")
+- [x] Error handling per singoli MRN (continua su errore)
+- [x] Logging dettagliato per ogni MRN processato
+- [x] Screenshot per ogni MRN (debug/tracking)
+
+### 11. Shadow DOM Date-Time Picker Integration ✓
+- [x] Accesso componente Vaadin date-time picker in Shadow DOM
+- [x] Implementato `fillArrivalDateTime()` con strategie multiple
+- [x] Strategia diretta: setter su componente principale
+- [x] Strategia Shadow DOM: accesso a date-picker e time-picker interni
+- [x] Gestione formato ISO 8601 (YYYY-MM-DDTHH:MM)
+- [x] Calcolo data/ora corrente + 1 ora
+- [x] Dispatch eventi per validazione Vaadin
+- [x] Error handling e screenshot diagnostici
+
+### 12. Send Button Implementation ✓
+- [x] Implementato metodo `clickSendButton()`
+- [x] Selettore `#send` per bottone Vaadin prominent
+- [x] Wait for button visibility e enabled state
+- [x] Timeout configurabile (10s default)
+- [x] Verifica stato bottone (enabled/disabled)
+- [x] Click con Playwright locator API
+- [x] Screenshot post-click per conferma
+- [x] Error handling con screenshot diagnostico
+
+### 13. Progress Tracking & UI Feedback ✓
+- [x] Formato progress `[X/Y]` per MRN correnti/totali
+- [x] Messaggi real-time su UI via IPC
+- [x] Display MRN corrente in processing
+- [x] Counter totale MRN processati
+- [x] Status updates per ogni step automazione
+- [x] Messaggi differenziati per tipo (info/success/error)
+- [x] Completion summary con totale MRN elaborati
 
 ---
 
@@ -250,6 +288,16 @@ _Nessun issue critico noto_
 ---
 
 ## 🔄 Changelog Recenti
+
+### 2025-11-10 - v1.0.1
+- ✨ Implementato Multi-MRN Batch Processing (loop automatico su tutti gli MRN)
+- ✨ Aggiunto Shadow DOM date-time picker integration (fillArrivalDateTime)
+- ✨ Implementato clickSendButton() per invio dichiarazione
+- ✨ Progress tracking con formato [X/Y] per MRN correnti/totali
+- ✨ Reset automatico tra MRN (torna a "Nuova dichiarazione")
+- 🐛 Fix date-time picker Vaadin con accesso Shadow DOM multi-strategia
+- 📈 Improved error handling per batch processing
+- 📝 Updated documentazione completa
 
 ### 2025-11-07 - v1.0.0
 - ✨ Initial release

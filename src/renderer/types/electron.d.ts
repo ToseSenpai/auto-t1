@@ -85,6 +85,13 @@ declare namespace JSX {
 
 // ElectronAPI interface matching preload.ts
 export interface ElectronAPI {
+  selectExcelFile: () => Promise<{
+    success: boolean;
+    filePath?: string;
+    fileName?: string;
+    cancelled?: boolean;
+    error?: string;
+  }>;
   startAutomation: (data: {
     username: string;
     password: string;

@@ -9,6 +9,9 @@ export interface Selectors {
     submit_button: string;
   };
   main_page: Record<string, string>;
+  declaration_form: {
+    mrn_field: string;
+  };
 }
 
 export interface BrowserConfig {
@@ -50,13 +53,16 @@ export class Config {
   // Selettori CSS per il login (sito Vaadin con Shadow DOM)
   static readonly SELECTORS: Selectors = {
     login: {
-      username_field: "#txtUsername",
+      username_field: "#usernameTextField",
       password_field: "#pwdPassword",
       submit_button: "#btnLogin",
     },
     main_page: {
       // Aggiungi qui altri selettori per le varie operazioni
       // Esempio: input_field: '#some-id',
+    },
+    declaration_form: {
+      mrn_field: "#ucr", // MRN = UCR (Unique Consignment Reference) in questo sistema
     },
   };
 

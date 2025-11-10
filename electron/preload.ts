@@ -7,6 +7,9 @@ import { contextBridge, ipcRenderer } from "electron";
 
 // Espone API sicure al renderer process
 contextBridge.exposeInMainWorld("electronAPI", {
+  // Excel
+  selectExcelFile: () => ipcRenderer.invoke("excel:select-file"),
+
   // Automazione
   startAutomation: (data: {
     username: string;
@@ -43,6 +46,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
 // Type definitions per TypeScript
 export interface ElectronAPI {
+  selectExcelFile: () => Promise<{
+    success: boolean;
+    filePath?: string;
+    fileName?: string;
+    cancelled?: boolean;
+    error?: string;
+  }>;
   startAutomation: (data: {
     username: string;
     password: string;

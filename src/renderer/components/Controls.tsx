@@ -6,14 +6,34 @@ function Controls() {
   const username = useStore((state) => state.username);
   const password = useStore((state) => state.password);
   const excelPath = useStore((state) => state.excelPath);
+  const setExcelPath = useStore((state) => state.setExcelPath);
   const startAutomation = useStore((state) => state.startAutomation);
   const stopAutomation = useStore((state) => state.stopAutomation);
   const pauseAutomation = useStore((state) => state.pauseAutomation);
   const addLog = useStore((state) => state.addLog);
 
+  const handleSelectFile = async () => {
+    try {
+      const result = await window.electronAPI.selectExcelFile();
+      if (result.success && result.filePath) {
+        setExcelPath(result.filePath);
+        addLog("success", `File Excel selezionato: ${result.fileName}`);
+      } else if (result.cancelled) {
+        addLog("info", "Selezione file annullata");
+      }
+    } catch (error) {
+      addLog("error", `Errore selezione file: ${error}`);
+    }
+  };
+
   const handleStart = async () => {
     if (!username || !password) {
       addLog("error", "Inserisci username e password");
+      return;
+    }
+
+    if (!excelPath) {
+      addLog("error", "Seleziona un file Excel");
       return;
     }
 
@@ -28,19 +48,7 @@ function Controls() {
       });
 
       if (result.success) {
-        addLog("success", "Login completato, avvio processamento...");
-
-        // Avvia processamento righe
-        const processResult = await window.electronAPI.processRows();
-
-        if (processResult.success && processResult.stats) {
-          addLog(
-            "success",
-            `Completato! ${processResult.stats.success}/${processResult.stats.total} righe elaborate`
-          );
-        } else {
-          addLog("error", processResult.error || "Errore processamento");
-        }
+        addLog("success", "Automazione completata con successo!");
       } else {
         addLog("error", result.error || "Errore avvio automazione");
       }
@@ -61,11 +69,44 @@ function Controls() {
     }
   };
 
+  const getFileName = () => {
+    if (!excelPath) return "Nessun file selezionato";
+    const parts = excelPath.split(/[\\/]/);
+    return parts[parts.length - 1];
+  };
+
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
         Controlli
       </h2>
+
+      {/* Selezione File Excel */}
+      <div className="space-y-2">
+        <button
+          onClick={handleSelectFile}
+          disabled={isRunning}
+          className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          Seleziona File Excel
+        </button>
+        <p className="text-xs text-gray-400 text-center truncate">
+          {getFileName()}
+        </p>
+      </div>
 
       <div className="flex gap-2">
         {!isRunning ? (

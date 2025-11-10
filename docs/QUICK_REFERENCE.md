@@ -279,6 +279,48 @@ npx playwright install chromium
 # Controlla DevTools console per errori
 ```
 
+### Problema: Date-Time Picker non si compila
+```bash
+# Verifica Shadow DOM access
+# Controlla logs per errore "date-time-picker non trovato"
+
+# Screenshot diagnostico in logs/
+# Cerca: arrival_datetime_error_*.png
+
+# Verifica selettore in src/config.ts
+# O aumenta timeout in src/web-automation.ts:fillArrivalDateTime()
+
+# Fallback: verifica struttura DOM manuale
+# DevTools → Inspect element → guarda Shadow DOM
+```
+
+### Problema: Multi-MRN loop si blocca
+```bash
+# Verifica numero MRN in Excel
+# Prima colonna deve avere header "MRN" in A1
+
+# Check logs per quale MRN fallisce
+# Cerca "[X/Y]" nei log per ultimo MRN processato
+
+# Verifica timeout reset (2s default)
+# Se rete lenta, aumenta timeout in electron/main.ts:378
+
+# Screenshot per ogni step in logs/
+# Cerca pattern: send_button_clicked, mrn_field_filled, etc.
+```
+
+### Problema: Progress tracking non visibile
+```bash
+# Verifica IPC communication
+# Check console per messaggi automation:status
+
+# Restart Electron app
+# npm run electron:dev
+
+# Controlla LogViewer component
+# src/renderer/components/LogViewer.tsx
+```
+
 ---
 
 ## ⚡ Performance Tips
