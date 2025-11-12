@@ -241,6 +241,9 @@ function setupIPCHandlers() {
         message: `${mrnProgress} Click su 'NCTS Arrival Notification IT' completato`,
       });
 
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Click su MX DHL (step 2)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -260,6 +263,9 @@ function setupIPCHandlers() {
         message: `${mrnProgress} Click su 'MX DHL - MXP GTW - DEST AUT' completato`,
       });
 
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Click su OK conferma (step 3)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -275,6 +281,9 @@ function setupIPCHandlers() {
         type: "success",
         message: `${mrnProgress} Click su 'OK' conferma completato`,
       });
+
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Attendi caricamento nuova pagina (step 4)
       mainWindow?.webContents.send("automation:status", {
@@ -295,6 +304,9 @@ function setupIPCHandlers() {
         message: `${mrnProgress} Nuova pagina caricata con successo`,
       });
 
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Compila campo MRN (step 5)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -313,6 +325,9 @@ function setupIPCHandlers() {
         type: "success",
         message: `${mrnProgress} Campo MRN compilato: ${currentMRN}`,
       });
+
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Verifica campo Sede di destinazione (step 6)
       mainWindow?.webContents.send("automation:status", {
@@ -333,6 +348,9 @@ function setupIPCHandlers() {
         message: `${mrnProgress} Sede di destinazione verificata: ${sedeVerification.actualValue}`,
       });
 
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Compila campo Data/Ora di arrivo (step 7)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -349,8 +367,11 @@ function setupIPCHandlers() {
 
       mainWindow?.webContents.send("automation:status", {
         type: "success",
-        message: `${mrnProgress} Campo Data/Ora di arrivo compilato (ora corrente + 1 ora)`,
+        message: `${mrnProgress} Campo Data/Ora di arrivo compilato (oggi alle 20:00)`,
       });
+
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Clicca su bottone "Invia" (step 8)
       mainWindow?.webContents.send("automation:status", {
@@ -371,6 +392,9 @@ function setupIPCHandlers() {
         message: `${mrnProgress} Dichiarazione inviata con successo per MRN: ${currentMRN}`,
       });
 
+      // Delay per rallentare la macro
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Se non è l'ultimo MRN, torna a "Nuova dichiarazione" per il prossimo
       if (mrnIndex < totalMRNs - 1) {
         mainWindow?.webContents.send("automation:status", {
@@ -389,6 +413,10 @@ function setupIPCHandlers() {
             error: `${mrnProgress} Impossibile cliccare su 'Nuova dichiarazione' per MRN successivo`,
           };
         }
+
+        // Attendi extra dopo clickNewDeclaration() (che già attende internamente)
+        // Prima che il loop ricominci con clickNCTSArrival()
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
         mainWindow?.webContents.send("automation:status", {
           type: "success",

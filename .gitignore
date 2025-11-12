@@ -70,6 +70,7 @@ data/*.xls
 logs/*.log
 logs/*.png
 logs/*.jpg
+logs/screenshots/
 !logs/.gitkeep
 
 # Playwright

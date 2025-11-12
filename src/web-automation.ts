@@ -558,16 +558,36 @@ export class WebAutomation {
     try {
       console.log("Click su bottone 'Nuova dichiarazione'...");
 
+      // Attendi che la pagina sia completamente caricata
+      await this.page.waitForLoadState("networkidle", { timeout: 15000 });
+
       // Usa l'ID del bottone (più affidabile)
       const button = this.page.locator("#btnNewDeclaration");
 
-      // Attendi che il bottone sia visibile
+      // Attendi che il bottone sia visibile e attached
       await button.waitFor({ state: "visible", timeout: 10000 });
+      await button.waitFor({ state: "attached", timeout: 10000 });
+
+      // Scroll al bottone per assicurarsi che sia nel viewport
+      await button.scrollIntoViewIfNeeded();
 
       // Click sul bottone
       await button.click();
 
-      console.log("Click su 'Nuova dichiarazione' eseguito con successo");
+      // ✅ FIX CRITICO: Attendi che la navigazione sia completa DOPO il click
+      console.log("Attendendo navigazione dopo click 'Nuova dichiarazione'...");
+
+      // Attendi che la pagina si ricarichi (networkidle)
+      await this.page.waitForLoadState("networkidle", { timeout: 15000 });
+
+      // Attendi che la grid sia presente nel DOM
+      const grid = this.page.locator("vaadin-grid").first();
+      await grid.waitFor({ state: "attached", timeout: 10000 });
+
+      // Attendi extra per permettere alla grid di popolarsi con i dati
+      await this.page.waitForTimeout(2000);
+
+      console.log("Click su 'Nuova dichiarazione' eseguito con successo e grid caricata");
       return true;
     } catch (error) {
       console.error("Errore nel click su 'Nuova dichiarazione':", error);
@@ -587,19 +607,55 @@ export class WebAutomation {
     try {
       console.log("Click su 'NCTS Arrival Notification IT'...");
 
-      // Trova la cella con testo "NCTS Arrival Notification IT"
-      const cell = this.page
-        .locator("vaadin-grid-cell-content")
-        .filter({ hasText: "NCTS Arrival Notification IT" })
-        .first();
+      // 🔍 DEBUG: Log URL corrente
+      const currentUrl = this.page.url();
+      console.log(`[DEBUG clickNCTS] URL corrente: ${currentUrl}`);
+
+      // Attendi che la pagina sia completamente caricata (importante per il secondo MRN)
+      await this.page.waitForLoadState("networkidle", { timeout: 15000 });
+
+      // Attendi che la grid sia presente e non in loading
+      const grid = this.page.locator("vaadin-grid").first();
+
+      // 🔍 DEBUG: Verifica se la grid esiste
+      const gridCount = await grid.count();
+      console.log(`[DEBUG clickNCTS] Grid count: ${gridCount}`);
+
+      if (gridCount === 0) {
+        console.error("[DEBUG clickNCTS] ⚠️ Nessuna grid trovata!");
+        await this.takeScreenshot("ncts_no_grid_found");
+        return false;
+      }
+
+      await grid.waitFor({ state: "visible", timeout: 10000 });
+
+      // Attendi più tempo per permettere alla grid di popolarsi completamente
+      console.log("[DEBUG clickNCTS] Attendendo 3 secondi per popolamento grid...");
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Click direttamente sul testo (metodo più affidabile)
+      const textElement = this.page.getByText("NCTS Arrival Notification IT", { exact: true });
+
+      // 🔍 DEBUG: Verifica se il testo esiste
+      const textCount = await textElement.count();
+      console.log(`[DEBUG clickNCTS] Text "NCTS Arrival Notification IT" count: ${textCount}`);
+
+      if (textCount === 0) {
+        console.error("[DEBUG clickNCTS] ⚠️ Testo 'NCTS Arrival Notification IT' NON trovato!");
+        await this.takeScreenshot("ncts_text_not_found");
+        return false;
+      }
 
       // Attendi che sia visibile
-      await cell.waitFor({ state: "visible", timeout: 10000 });
+      await textElement.waitFor({ state: "visible", timeout: 10000 });
 
-      // Click sulla cella
-      await cell.click();
+      // Scroll al testo per assicurarsi che sia nel viewport
+      await textElement.scrollIntoViewIfNeeded();
 
-      console.log("Click su 'NCTS Arrival Notification IT' eseguito con successo");
+      // Click sul testo
+      await textElement.click();
+
+      console.log("✓ Click su 'NCTS Arrival Notification IT' eseguito con successo");
       return true;
     } catch (error) {
       console.error("Errore nel click su 'NCTS Arrival Notification IT':", error);
@@ -619,17 +675,20 @@ export class WebAutomation {
     try {
       console.log("Click su 'MX DHL - MXP GTW - DEST AUT'...");
 
-      // Trova la cella con il testo specifico
-      const cell = this.page
-        .locator("vaadin-grid-cell-content")
-        .filter({ hasText: "MX DHL - MXP GTW - DEST AUT" })
-        .first();
+      // Attendi un momento per permettere alla grid di aggiornarsi dopo il click precedente
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Click direttamente sul testo (metodo più affidabile)
+      const textElement = this.page.getByText("MX DHL - MXP GTW - DEST AUT", { exact: true });
 
       // Attendi che sia visibile
-      await cell.waitFor({ state: "visible", timeout: 10000 });
+      await textElement.waitFor({ state: "visible", timeout: 10000 });
 
-      // Click sulla cella
-      await cell.click();
+      // Scroll al testo per assicurarsi che sia nel viewport
+      await textElement.scrollIntoViewIfNeeded();
+
+      // Click sul testo
+      await textElement.click();
 
       console.log("Click su 'MX DHL - MXP GTW - DEST AUT' eseguito con successo");
       return true;
@@ -651,11 +710,18 @@ export class WebAutomation {
     try {
       console.log("Click su bottone 'OK' conferma...");
 
+      // Attendi un momento per permettere al dialog di apparire
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Usa l'ID del bottone
       const button = this.page.locator("#CreateDeclarationConfirmationButton");
 
-      // Attendi che sia visibile
+      // Attendi che sia visibile e attached
       await button.waitFor({ state: "visible", timeout: 10000 });
+      await button.waitFor({ state: "attached", timeout: 10000 });
+
+      // Scroll al bottone per assicurarsi che sia nel viewport
+      await button.scrollIntoViewIfNeeded();
 
       // Click sul bottone
       await button.click();
@@ -975,7 +1041,7 @@ export class WebAutomation {
   }
 
   /**
-   * Compila il campo data/ora di arrivo con data odierna e ora corrente + 1 ora
+   * Compila il campo data/ora di arrivo con data odierna e ora fissa alle 20:00
    * Campo: vaadin-date-time-picker con ID ArrivalNotificationDate
    * @returns true se compilato con successo
    */
@@ -988,16 +1054,15 @@ export class WebAutomation {
     }
 
     try {
-      // Calcola data/ora corrente + 1 ora
+      // Calcola data odierna con ora fissa alle 20:00
       const now = new Date();
-      now.setHours(now.getHours() + 1);
 
       // Formato ISO 8601: YYYY-MM-DDTHH:MM (richiesto da Vaadin)
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
       const day = String(now.getDate()).padStart(2, "0");
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const hours = "20";  // Ora fissa alle 20:00
+      const minutes = "00"; // Minuti fissi a 00
 
       const isoDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
 
