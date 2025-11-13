@@ -11,12 +11,12 @@ function LoginForm() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-semibold text-gray-200 tracking-tight">
+      <h2 className="text-base font-semibold text-gray-200 tracking-tight">
         Credenziali
       </h2>
 
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-gray-300">
+        <label className="block text-caption font-medium text-gray-300">
           Username
         </label>
         <div className="relative">
@@ -25,7 +25,7 @@ function LoginForm() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={isRunning}
-            className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+            className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
             placeholder="Inserisci il tuo username"
           />
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -47,7 +47,7 @@ function LoginForm() {
       </div>
 
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-gray-300">
+        <label className="block text-caption font-medium text-gray-300">
           Password
         </label>
         <div className="relative">
@@ -56,7 +56,7 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isRunning}
-            className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+            className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
             placeholder="Inserisci la tua password"
           />
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -78,7 +78,7 @@ function LoginForm() {
       </div>
 
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-gray-300">
+        <label className="block text-caption font-medium text-gray-300">
           File Excel
         </label>
         <div className="relative">
@@ -87,7 +87,7 @@ function LoginForm() {
             value={excelPath}
             onChange={(e) => setExcelPath(e.target.value)}
             disabled={isRunning}
-            className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+            className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
             placeholder="data/input.xlsx"
           />
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">

@@ -137,10 +137,10 @@ export default function WebView(_props: WebViewProps) {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-blue-300 to-purple-400 bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-blue-300 to-purple-400 bg-clip-text text-transparent">
                 Dashboard Live
               </h2>
-              <p className="text-sm text-gray-400">Monitoraggio automazione in tempo reale</p>
+              <p className="text-base text-gray-400">Monitoraggio automazione in tempo reale</p>
             </div>
           </div>
 
@@ -192,7 +192,7 @@ export default function WebView(_props: WebViewProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <p className="text-2xl font-bold text-green-400">{successCount}</p>
+                    <p className="text-3xl font-bold text-green-400">{successCount}</p>
                     <p className="text-xs text-gray-400">Successi</p>
                   </div>
                 </div>
@@ -205,7 +205,7 @@ export default function WebView(_props: WebViewProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <p className="text-2xl font-bold text-red-400">{errorCount}</p>
+                    <p className="text-3xl font-bold text-red-400">{errorCount}</p>
                     <p className="text-xs text-gray-400">Errori</p>
                   </div>
                 </div>
@@ -218,7 +218,7 @@ export default function WebView(_props: WebViewProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <p className="text-2xl font-bold text-blue-400 font-mono">{formatTime(elapsedTime)}</p>
+                    <p className="text-3xl font-bold text-blue-400 font-mono">{formatTime(elapsedTime)}</p>
                     <p className="text-xs text-gray-400">Tempo</p>
                   </div>
                 </div>
@@ -233,7 +233,7 @@ export default function WebView(_props: WebViewProps) {
             <svg className="w-5 h-5 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <h3 className="text-base font-semibold text-gray-200">Attività Recenti</h3>
+            <h3 className="text-lg font-semibold text-gray-200">Attività Recenti</h3>
           </div>
 
           {logs.length === 0 ? (
@@ -254,10 +254,10 @@ export default function WebView(_props: WebViewProps) {
                     {getLogIcon(log.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`${getLogColor(log.type)} text-sm font-medium`}>
+                    <p className={`${getLogColor(log.type)} text-base font-medium`}>
                       {log.message}
                     </p>
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-caption text-gray-600 mt-1">
                       {new Date(log.timestamp).toLocaleTimeString("it-IT")}
                     </p>
                   </div>

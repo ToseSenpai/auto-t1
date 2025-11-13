@@ -24,10 +24,10 @@ function Sidebar() {
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 via-blue-300 to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-blue-300 to-purple-400 bg-clip-text text-transparent">
               Auto-T1
             </h1>
-            <p className="text-[10px] text-gray-400 font-medium">Automazione Web</p>
+            <p className="text-caption text-gray-400 font-medium">Automazione Web</p>
           </div>
         </div>
       </div>

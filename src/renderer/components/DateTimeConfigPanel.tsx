@@ -74,13 +74,13 @@ function DateTimeConfigPanel() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-semibold text-gray-200 tracking-tight">
+      <h2 className="text-base font-semibold text-gray-200 tracking-tight">
         Data e Ora Arrivo
       </h2>
 
       {/* Preset Dropdown */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-medium text-gray-300">
+        <label className="block text-caption font-medium text-gray-300">
           Configurazione
         </label>
         <div className="relative">
@@ -88,7 +88,7 @@ function DateTimeConfigPanel() {
             value={getCurrentPresetValue()}
             onChange={handlePresetChange}
             disabled={isRunning}
-            className="w-full px-3 py-2 pr-8 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-xs text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft appearance-none cursor-pointer"
+            className="w-full px-3 py-2 pr-8 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft appearance-none cursor-pointer"
           >
             {presets.map(preset => (
               <option key={preset.value} value={preset.value}>
@@ -119,14 +119,14 @@ function DateTimeConfigPanel() {
         <div className="space-y-3 pl-2 border-l-2 border-accent-blue/30">
           {/* Sub-mode Selection */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-gray-300">
+            <label className="block text-caption font-medium text-gray-300">
               Tipo Personalizzazione
             </label>
             <select
               value={dateTimeConfig.mode}
               onChange={handleSubModeChange}
               disabled={isRunning}
-              className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-xs text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+              className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
             >
               <option value="today-fixed">Data odierna + Ora fissa</option>
               <option value="today-current">Data odierna + Ora attuale</option>
@@ -138,7 +138,7 @@ function DateTimeConfigPanel() {
           {/* Custom Date Input */}
           {needsCustomDate && (
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-gray-300">
+              <label className="block text-caption font-medium text-gray-300">
                 Data Personalizzata
               </label>
               <div className="relative">
@@ -147,7 +147,7 @@ function DateTimeConfigPanel() {
                   value={dateTimeConfig.customDate || ''}
                   onChange={handleCustomDateChange}
                   disabled={isRunning}
-                  className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-xs text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+                  className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
                 />
               </div>
             </div>
@@ -156,7 +156,7 @@ function DateTimeConfigPanel() {
           {/* Fixed Time Input */}
           {needsFixedTime && (
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-gray-300">
+              <label className="block text-caption font-medium text-gray-300">
                 Ora Fissa
               </label>
               <div className="relative">
@@ -165,7 +165,7 @@ function DateTimeConfigPanel() {
                   value={dateTimeConfig.fixedTime || '20:00'}
                   onChange={handleFixedTimeChange}
                   disabled={isRunning}
-                  className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-xs text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+                  className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
                 />
               </div>
             </div>
@@ -188,7 +188,7 @@ function DateTimeConfigPanel() {
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p className="text-[10px] text-gray-300 leading-relaxed">
+        <p className="text-caption text-gray-300 leading-relaxed">
           {dateTimeConfig.mode === 'today-current' && "Verrà usata la data odierna con l'ora al momento dell'esecuzione"}
           {dateTimeConfig.mode === 'today-fixed' && `Verrà usata la data odierna con ora fissa alle ${dateTimeConfig.fixedTime || '20:00'}`}
           {dateTimeConfig.mode === 'custom-current' && "Verrà usata la data personalizzata con l'ora al momento dell'esecuzione"}

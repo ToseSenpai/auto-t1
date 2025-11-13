@@ -7,6 +7,9 @@ export default {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', 'monospace'],
       },
+      fontSize: {
+        'caption': '11px',  // Helper text, timestamps, meta info
+      },
       colors: {
         // Windows 11-inspired primary blue
         primary: {
