@@ -405,16 +405,17 @@ function setupIPCHandlers() {
         // Attendi che la pagina torni a /cm/declarations dopo l'invio
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Click su "Nuova dichiarazione" per il prossimo MRN
-        const newDeclSuccess = await webAutomation.clickNewDeclaration();
+        // ✅ FIX BUG: Navigazione forzata invece di click bottone
+        // Usa page.goto() per evitare race conditions e garantire grid popolata
+        const newDeclSuccess = await webAutomation.navigateToNewDeclaration();
         if (!newDeclSuccess) {
           return {
             success: false,
-            error: `${mrnProgress} Impossibile cliccare su 'Nuova dichiarazione' per MRN successivo`,
+            error: `${mrnProgress} Impossibile navigare a pagina nuova dichiarazione per MRN successivo`,
           };
         }
 
-        // Attendi extra dopo clickNewDeclaration() (che già attende internamente)
+        // Attendi extra dopo navigazione (che già attende internamente)
         // Prima che il loop ricominci con clickNCTSArrival()
         await new Promise(resolve => setTimeout(resolve, 3000));
 

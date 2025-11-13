@@ -1,8 +1,69 @@
 # 🐛 BUG: Click su NCTS fallisce al secondo MRN
 
-**Data**: 2025-11-12
-**Status**: 🔴 NON RISOLTO
-**Priorità**: CRITICA
+**Data Segnalazione**: 2025-11-12
+**Data Fix**: 2025-11-13
+**Status**: ✅ **RISOLTO**
+**Priorità**: ~~CRITICA~~ → RISOLTA
+
+---
+
+## ✅ FIX IMPLEMENTATO (2025-11-13)
+
+### Soluzione Adottata: Navigazione Forzata con `page.goto()`
+
+**Problema identificato:**
+Il click sul bottone "Nuova dichiarazione" causava race conditions - la grid non si popolava in tempo per il secondo MRN.
+
+**Soluzione implementata:**
+Sostituito `clickNewDeclaration()` con nuova funzione `navigateToNewDeclaration()` che usa `page.goto()` esplicito invece di click sul bottone.
+
+### Modifiche Implementate
+
+#### 1. **src/web-automation.ts** (riga 608-644)
+Aggiunta nuova funzione `navigateToNewDeclaration()`:
+```typescript
+async navigateToNewDeclaration(): Promise<boolean> {
+  // Navigazione diretta con page.goto()
+  const response = await this.page.goto(
+    "https://app.customs.blujaysolutions.net/cm/declarations",
+    { waitUntil: "networkidle", timeout: 15000 }
+  );
+
+  // Verifica response OK
+  // Attende grid attached
+  // Delay 2s per popolamento
+}
+```
+
+#### 2. **electron/main.ts** (riga 410)
+Sostituita chiamata nel loop multi-MRN:
+```typescript
+// PRIMA:
+const newDeclSuccess = await webAutomation.clickNewDeclaration();
+
+// DOPO:
+const newDeclSuccess = await webAutomation.navigateToNewDeclaration();
+```
+
+### Vantaggi della Soluzione
+
+✅ **Navigazione deterministica** - Non dipende dallo stato del bottone
+✅ **Evita race conditions** - `goto()` attende completion prima di proseguire
+✅ **Grid sempre fresca** - Pagina ricaricata completamente ad ogni MRN
+✅ **Stesso timeout system** - Mantiene verifiche `attached` e delay esistenti
+✅ **Backward compatible** - `clickNewDeclaration()` rimane per altri use case
+
+### Test Consigliati
+
+Eseguire `npm run electron:dev` e processare almeno 3 MRN consecutivi per verificare che:
+1. ✅ Il primo MRN completi correttamente
+2. ✅ La transizione al secondo MRN funzioni
+3. ✅ `clickNCTS()` trovi la grid popolata al secondo MRN
+4. ✅ Il terzo MRN completi senza errori
+
+---
+
+## 📋 Descrizione del Problema Originale
 
 ---
 

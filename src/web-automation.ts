@@ -597,6 +597,53 @@ export class WebAutomation {
   }
 
   /**
+   * Naviga FORZATAMENTE alla pagina nuova dichiarazione usando page.goto()
+   * Usato nella transizione multi-MRN per evitare fallimenti di click sul bottone
+   *
+   * Vantaggi rispetto a clickNewDeclaration():
+   * - Navigazione deterministica senza dipendere dallo stato del bottone
+   * - Evita race conditions tra click e caricamento pagina
+   * - Grid sempre fresca perché la pagina viene ricaricata completamente
+   */
+  async navigateToNewDeclaration(): Promise<boolean> {
+    if (!this.page) {
+      return false;
+    }
+
+    try {
+      console.log("Navigazione FORZATA a pagina nuova dichiarazione...");
+
+      // ✅ NAVIGAZIONE ESPLICITA INVECE DI CLICK
+      const response = await this.page.goto(
+        "https://app.customs.blujaysolutions.net/cm/declarations",
+        { waitUntil: "networkidle", timeout: 15000 }
+      );
+
+      if (!response || !response.ok()) {
+        console.error(`Errore di navigazione: status ${response?.status()}`);
+        await this.takeScreenshot("navigate_new_declaration_error");
+        return false;
+      }
+
+      console.log("✓ Navigazione a /cm/declarations completata");
+
+      // Attendi che la grid sia caricata e attached al DOM
+      const grid = this.page.locator("vaadin-grid").first();
+      await grid.waitFor({ state: "attached", timeout: 10000 });
+
+      // Attendi extra per permettere alla grid di popolarsi con i dati
+      await this.page.waitForTimeout(2000);
+
+      console.log("✓ Grid caricata e pronta per il prossimo MRN");
+      return true;
+    } catch (error) {
+      console.error("Errore nella navigazione forzata:", error);
+      await this.takeScreenshot("navigate_new_declaration_exception");
+      return false;
+    }
+  }
+
+  /**
    * Clicca sulla cella "NCTS Arrival Notification IT" nella grid
    */
   async clickNCTS(): Promise<boolean> {
