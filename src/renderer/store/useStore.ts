@@ -11,6 +11,19 @@ export interface LogEntry {
   timestamp: Date;
 }
 
+/**
+ * Date/Time Configuration Interface
+ * - 'today-fixed': Data odierna + ora fissa (es. 20:00)
+ * - 'today-current': Data odierna + ora attuale
+ * - 'custom-fixed': Data personalizzata + ora fissa
+ * - 'custom-current': Data personalizzata + ora attuale
+ */
+export interface DateTimeConfig {
+  mode: 'today-fixed' | 'today-current' | 'custom-fixed' | 'custom-current';
+  customDate?: string; // Format: YYYY-MM-DD (only if mode includes 'custom')
+  fixedTime?: string; // Format: HH:MM (only if mode includes 'fixed')
+}
+
 interface AutomationState {
   // Status
   isRunning: boolean;
@@ -20,6 +33,9 @@ interface AutomationState {
   username: string;
   password: string;
   excelPath: string;
+
+  // Date/Time Configuration
+  dateTimeConfig: DateTimeConfig;
 
   // Progress
   current: number;
@@ -37,6 +53,7 @@ interface AutomationState {
   setUsername: (username: string) => void;
   setPassword: (password: string) => void;
   setExcelPath: (path: string) => void;
+  setDateTimeConfig: (config: DateTimeConfig) => void;
   startAutomation: () => void;
   stopAutomation: () => void;
   pauseAutomation: () => void;
@@ -53,6 +70,10 @@ export const useStore = create<AutomationState>((set, get) => ({
   username: "",
   password: "",
   excelPath: "data/input.xlsx",
+  dateTimeConfig: {
+    mode: 'today-fixed',
+    fixedTime: '20:00', // Default: oggi alle 20:00 (backward compatible)
+  },
   current: 0,
   total: 0,
   percentage: 0,
@@ -66,6 +87,8 @@ export const useStore = create<AutomationState>((set, get) => ({
   setPassword: (password) => set({ password }),
 
   setExcelPath: (path) => set({ excelPath: path }),
+
+  setDateTimeConfig: (config) => set({ dateTimeConfig: config }),
 
   startAutomation: () => {
     set({ isRunning: true, isPaused: false });

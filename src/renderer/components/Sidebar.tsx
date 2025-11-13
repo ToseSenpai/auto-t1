@@ -1,4 +1,5 @@
 import LoginForm from "./LoginForm";
+import DateTimeConfigPanel from "./DateTimeConfigPanel";
 import Controls from "./Controls";
 
 function Sidebar() {
@@ -38,8 +39,13 @@ function Sidebar() {
           <LoginForm />
         </div>
 
-        {/* Controls */}
+        {/* Date/Time Configuration Panel */}
         <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          <DateTimeConfigPanel />
+        </div>
+
+        {/* Controls */}
+        <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <Controls />
         </div>
       </div>

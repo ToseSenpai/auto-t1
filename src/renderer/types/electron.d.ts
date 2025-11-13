@@ -83,6 +83,19 @@ declare namespace JSX {
   }
 }
 
+/**
+ * Date/Time Configuration Interface
+ * - 'today-fixed': Data odierna + ora fissa (es. 20:00)
+ * - 'today-current': Data odierna + ora attuale
+ * - 'custom-fixed': Data personalizzata + ora fissa
+ * - 'custom-current': Data personalizzata + ora attuale
+ */
+export interface DateTimeConfig {
+  mode: 'today-fixed' | 'today-current' | 'custom-fixed' | 'custom-current';
+  customDate?: string; // Format: YYYY-MM-DD (only if mode includes 'custom')
+  fixedTime?: string; // Format: HH:MM (only if mode includes 'fixed')
+}
+
 // ElectronAPI interface matching preload.ts
 export interface ElectronAPI {
   selectExcelFile: () => Promise<{
@@ -96,6 +109,7 @@ export interface ElectronAPI {
     username: string;
     password: string;
     excelPath: string;
+    dateTimeConfig: DateTimeConfig;
   }) => Promise<{ success: boolean; error?: string }>;
   processRows: () => Promise<{
     success: boolean;

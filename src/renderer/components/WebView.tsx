@@ -5,7 +5,7 @@ interface WebViewProps {
   initialUrl?: string;
 }
 
-export default function WebView({ initialUrl = "about:blank" }: WebViewProps) {
+export default function WebView(_props: WebViewProps) {
   const isRunning = useStore((state) => state.isRunning);
   const isPaused = useStore((state) => state.isPaused);
   const current = useStore((state) => state.current);
@@ -34,6 +34,7 @@ export default function WebView({ initialUrl = "about:blank" }: WebViewProps) {
       setStartTime(null);
       setElapsedTime(0);
     }
+    return undefined;
   }, [isRunning, isPaused, startTime]);
 
   const formatTime = (seconds: number) => {

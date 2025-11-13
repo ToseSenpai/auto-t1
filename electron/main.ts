@@ -10,6 +10,7 @@ import { WebAutomation } from "../src/web-automation";
 import { ExcelHandler } from "../src/excel-handler";
 import type { RowData } from "../src/excel-handler";
 import type { BrowserWindow as BrowserWindowType } from "electron";
+import type { DateTimeConfig } from "./preload";
 
 let mainWindow: BrowserWindowType | null = null;
 let splashWindow: BrowserWindowType | null = null;
@@ -121,7 +122,7 @@ function createWindow() {
 function setupIPCHandlers() {
   ipcMain.handle("automation:start", async (_: any, data: any) => {
   try {
-    const { username, password, excelPath } = data;
+    const { username, password, excelPath, dateTimeConfig } = data;
 
     // Inizializza automazione
     webAutomation = new WebAutomation(username, password);
@@ -357,7 +358,7 @@ function setupIPCHandlers() {
         message: `${mrnProgress} Compilazione campo Data/Ora di arrivo...`,
       });
 
-      const dateTimeSuccess = await webAutomation.fillArrivalDateTime();
+      const dateTimeSuccess = await webAutomation.fillArrivalDateTime(dateTimeConfig);
       if (!dateTimeSuccess) {
         return {
           success: false,
@@ -367,7 +368,7 @@ function setupIPCHandlers() {
 
       mainWindow?.webContents.send("automation:status", {
         type: "success",
-        message: `${mrnProgress} Campo Data/Ora di arrivo compilato (oggi alle 20:00)`,
+        message: `${mrnProgress} Campo Data/Ora di arrivo compilato`,
       });
 
       // Delay per rallentare la macro

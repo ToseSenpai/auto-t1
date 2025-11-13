@@ -6,6 +6,7 @@ function Controls() {
   const username = useStore((state) => state.username);
   const password = useStore((state) => state.password);
   const excelPath = useStore((state) => state.excelPath);
+  const dateTimeConfig = useStore((state) => state.dateTimeConfig);
   const setExcelPath = useStore((state) => state.setExcelPath);
   const startAutomation = useStore((state) => state.startAutomation);
   const stopAutomation = useStore((state) => state.stopAutomation);
@@ -45,6 +46,7 @@ function Controls() {
         username,
         password,
         excelPath,
+        dateTimeConfig,
       });
 
       if (result.success) {

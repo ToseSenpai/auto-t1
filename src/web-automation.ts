@@ -21,6 +21,19 @@ export interface ActionData {
   url?: string;
 }
 
+/**
+ * Date/Time Configuration Interface
+ * - 'today-fixed': Data odierna + ora fissa (es. 20:00)
+ * - 'today-current': Data odierna + ora attuale
+ * - 'custom-fixed': Data personalizzata + ora fissa
+ * - 'custom-current': Data personalizzata + ora attuale
+ */
+export interface DateTimeConfig {
+  mode: 'today-fixed' | 'today-current' | 'custom-fixed' | 'custom-current';
+  customDate?: string; // Format: YYYY-MM-DD (only if mode includes 'custom')
+  fixedTime?: string; // Format: HH:MM (only if mode includes 'fixed')
+}
+
 export class WebAutomation {
   private browser: Browser | null = null;
   private context: BrowserContext | null = null;
@@ -1092,8 +1105,9 @@ export class WebAutomation {
    * Campo: vaadin-date-time-picker con ID ArrivalNotificationDate
    * @returns true se compilato con successo
    */
-  async fillArrivalDateTime(): Promise<boolean> {
+  async fillArrivalDateTime(config: DateTimeConfig = { mode: 'today-fixed', fixedTime: '20:00' }): Promise<boolean> {
     console.log("Compilazione campo Data/Ora di arrivo...");
+    console.log(`Configurazione: ${config.mode}, customDate: ${config.customDate || 'N/A'}, fixedTime: ${config.fixedTime || 'N/A'}`);
 
     if (!this.page) {
       console.error("Browser non inizializzato");
@@ -1101,19 +1115,46 @@ export class WebAutomation {
     }
 
     try {
-      // Calcola data odierna con ora fissa alle 20:00
+      // Calcola data e ora in base alla configurazione
       const now = new Date();
+      let dateStr: string;
+      let timeStr: string;
+
+      // Determina la data in base al mode
+      if (config.mode.includes('custom')) {
+        // Usa data personalizzata
+        if (!config.customDate) {
+          console.error("customDate non fornito per mode custom");
+          return false;
+        }
+        dateStr = config.customDate; // Formato YYYY-MM-DD
+      } else {
+        // Usa data odierna
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        dateStr = `${year}-${month}-${day}`;
+      }
+
+      // Determina l'ora in base al mode
+      if (config.mode.includes('fixed')) {
+        // Usa ora fissa
+        if (!config.fixedTime) {
+          console.error("fixedTime non fornito per mode fixed");
+          return false;
+        }
+        timeStr = config.fixedTime; // Formato HH:MM
+      } else {
+        // Usa ora attuale
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        timeStr = `${hours}:${minutes}`;
+      }
 
       // Formato ISO 8601: YYYY-MM-DDTHH:MM (richiesto da Vaadin)
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hours = "20";  // Ora fissa alle 20:00
-      const minutes = "00"; // Minuti fissi a 00
+      const isoDateTime = `${dateStr}T${timeStr}`;
 
-      const isoDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-      console.log(`Data/ora da impostare: ${isoDateTime}`);
+      console.log(`Data/ora da impostare: ${isoDateTime} (mode: ${config.mode})`);
 
       // Trova il componente e imposta il valore accedendo al Shadow DOM
       const result = await this.page.evaluate(({ dateTime }) => {
