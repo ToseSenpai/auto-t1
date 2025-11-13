@@ -7,10 +7,10 @@ function Sidebar() {
     <div className="w-[380px] bg-gradient-to-br from-dark-900 via-dark-850 to-gray-900 border-r border-gray-700/50 flex flex-col shadow-2xl">
       {/* Header */}
       <div className="p-4 border-b border-gray-700/50 bg-gradient-to-br from-accent-blue/10 via-transparent to-accent-purple/5 backdrop-blur-lg">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-2xl bg-gradient-to-br from-accent-blue to-blue-700 flex items-center justify-center shadow-glow-blue">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent-blue to-blue-700 flex items-center justify-center shadow-glow-blue">
             <svg
-              className="w-4 h-4 text-white"
+              className="w-5 h-5 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -27,7 +27,7 @@ function Sidebar() {
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-blue-300 to-purple-400 bg-clip-text text-transparent">
               Auto-T1
             </h1>
-            <p className="text-caption text-gray-400 font-medium">Automazione Web</p>
+            <p className="text-caption-upper text-gray-400">Automazione Web</p>
           </div>
         </div>
       </div>
