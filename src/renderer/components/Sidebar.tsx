@@ -1,6 +1,4 @@
 import LoginForm from "./LoginForm";
-import ProgressBar from "./ProgressBar";
-import LogViewer from "./LogViewer";
 import Controls from "./Controls";
 
 function Sidebar() {
@@ -43,16 +41,6 @@ function Sidebar() {
         {/* Controls */}
         <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
           <Controls />
-        </div>
-
-        {/* Progress */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          <ProgressBar />
-        </div>
-
-        {/* Logs */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
-          <LogViewer />
         </div>
       </div>
     </div>
