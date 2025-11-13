@@ -37,6 +37,9 @@ export default {
         "soft-lg": "0 4px 16px rgba(0, 0, 0, 0.12)",
         "glow-blue": "0 0 20px rgba(59, 130, 246, 0.3)",
         "glow-purple": "0 0 20px rgba(142, 140, 216, 0.3)",
+        "glow-cyan": "0 0 20px rgba(0, 183, 195, 0.3)",
+        "glow-green": "0 0 20px rgba(16, 124, 16, 0.3)",
+        "glow-orange": "0 0 20px rgba(216, 59, 1, 0.3)",
         "inner-soft": "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
       },
       animation: {

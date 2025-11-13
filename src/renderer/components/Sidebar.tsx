@@ -3,7 +3,7 @@ import Controls from "./Controls";
 
 function Sidebar() {
   return (
-    <div className="w-[380px] bg-gradient-to-b from-dark-900 via-gray-900 to-dark-850 border-r border-gray-700/50 flex flex-col shadow-2xl">
+    <div className="w-[380px] bg-gradient-to-br from-dark-900 via-dark-850 to-gray-900 border-r border-gray-700/50 flex flex-col shadow-2xl">
       {/* Header */}
       <div className="p-4 border-b border-gray-700/50 bg-gradient-to-br from-accent-blue/10 via-transparent to-accent-purple/5 backdrop-blur-sm">
         <div className="flex items-center gap-2">

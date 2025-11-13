@@ -164,7 +164,7 @@ function Controls() {
           <>
             <button
               onClick={() => pauseAutomation()}
-              className="group flex-1 px-3 py-2 bg-gradient-to-br from-yellow-500 to-yellow-700 hover:from-yellow-600 hover:to-yellow-800 rounded-lg text-xs font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
+              className="group flex-1 px-3 py-2 bg-gradient-to-br from-accent-cyan to-cyan-700 hover:from-cyan-600 hover:to-cyan-800 rounded-lg text-xs font-medium shadow-soft hover:shadow-glow-cyan active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
             >
               {isPaused ? (
                 <>
@@ -192,7 +192,7 @@ function Controls() {
             </button>
             <button
               onClick={handleStop}
-              className="group flex-1 px-3 py-2 bg-gradient-to-br from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 rounded-lg text-xs font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
+              className="group flex-1 px-3 py-2 bg-gradient-to-br from-accent-purple to-purple-700 hover:from-purple-600 hover:to-purple-800 rounded-lg text-xs font-medium shadow-soft hover:shadow-glow-purple active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
             >
               <svg
                 className="w-4 h-4 group-hover:scale-110 transition-transform"
