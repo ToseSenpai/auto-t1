@@ -21,7 +21,7 @@ const isDev = process.env.NODE_ENV === "development";
 function createSplashWindow() {
   splashWindow = new BrowserWindow({
     width: 500,
-    height: 200,
+    height: 320, // Increased from 200 to fit all content (logo + bar + text)
     frame: false,
     alwaysOnTop: true,
     resizable: false,
