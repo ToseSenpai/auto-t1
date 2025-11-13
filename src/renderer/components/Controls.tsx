@@ -123,7 +123,7 @@ function Controls() {
         <button
           onClick={handleSelectFile}
           disabled={isRunning}
-          className="group w-full px-3 py-2 bg-gradient-to-br from-accent-green to-green-700 hover:from-green-600 hover:to-green-800 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed rounded-lg text-sm font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-2 transition-all"
+          className="group w-full px-3 py-2.5 bg-accent-green/90 hover:bg-accent-green border border-accent-green/20 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all"
         >
           <svg
             className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -140,7 +140,7 @@ function Controls() {
           </svg>
           Seleziona File Excel
         </button>
-        <div className="px-2 py-1.5 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50">
+        <div className="px-2 py-1.5 bg-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/30">
           <p className="text-caption text-gray-300 text-center truncate">
             {getFileName()}
           </p>
@@ -151,7 +151,7 @@ function Controls() {
         {!isRunning ? (
           <button
             onClick={handleStart}
-            className="group flex-1 px-3 py-2 bg-gradient-to-br from-accent-blue to-blue-700 hover:from-blue-600 hover:to-blue-800 rounded-lg text-sm font-medium shadow-soft hover:shadow-glow-blue active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
+            className="group flex-1 px-3 py-2.5 bg-accent-blue/90 hover:bg-accent-blue border border-accent-blue/20 rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all"
           >
             <svg
               className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -166,7 +166,7 @@ function Controls() {
           <>
             <button
               onClick={() => pauseAutomation()}
-              className="group flex-1 px-3 py-2 bg-gradient-to-br from-accent-cyan to-cyan-700 hover:from-cyan-600 hover:to-cyan-800 rounded-lg text-sm font-medium shadow-soft hover:shadow-glow-cyan active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
+              className="group flex-1 px-3 py-2.5 bg-accent-cyan/90 hover:bg-accent-cyan border border-accent-cyan/20 rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all"
             >
               {isPaused ? (
                 <>
@@ -194,7 +194,7 @@ function Controls() {
             </button>
             <button
               onClick={handleStop}
-              className="group flex-1 px-3 py-2 bg-gradient-to-br from-accent-purple to-purple-700 hover:from-purple-600 hover:to-purple-800 rounded-lg text-sm font-medium shadow-soft hover:shadow-glow-purple active:scale-[0.98] flex items-center justify-center gap-1.5 transition-all"
+              className="group flex-1 px-3 py-2.5 bg-accent-purple/90 hover:bg-accent-purple border border-accent-purple/20 rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all"
             >
               <svg
                 className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -214,7 +214,7 @@ function Controls() {
         <button
           onClick={handleCheckMRN}
           disabled={isRunning}
-          className="group w-full px-3 py-2 bg-gradient-to-br from-accent-orange to-orange-700 hover:from-orange-600 hover:to-orange-800 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed rounded-lg text-sm font-medium shadow-soft hover:shadow-soft-lg active:scale-[0.98] flex items-center justify-center gap-2 transition-all"
+          className="group w-full px-3 py-2.5 bg-accent-orange/90 hover:bg-accent-orange border border-accent-orange/20 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all"
         >
           <svg
             className="w-4 h-4 group-hover:scale-110 transition-transform"

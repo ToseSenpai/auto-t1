@@ -79,8 +79,8 @@ function DateTimeConfigPanel() {
       </h2>
 
       {/* Preset Dropdown */}
-      <div className="space-y-1.5">
-        <label className="block text-caption font-medium text-gray-300">
+      <div className="space-y-2">
+        <label className="block text-caption-upper text-gray-400">
           Configurazione
         </label>
         <div className="relative">
@@ -88,7 +88,7 @@ function DateTimeConfigPanel() {
             value={getCurrentPresetValue()}
             onChange={handlePresetChange}
             disabled={isRunning}
-            className="w-full px-3 py-2 pr-8 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft appearance-none cursor-pointer"
+            className="w-full px-3 py-2.5 pr-8 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all appearance-none cursor-pointer"
           >
             {presets.map(preset => (
               <option key={preset.value} value={preset.value}>
@@ -118,15 +118,15 @@ function DateTimeConfigPanel() {
       {isCustomMode && (
         <div className="space-y-3 pl-2 border-l-2 border-accent-blue/30">
           {/* Sub-mode Selection */}
-          <div className="space-y-1.5">
-            <label className="block text-caption font-medium text-gray-300">
+          <div className="space-y-2">
+            <label className="block text-caption-upper text-gray-400">
               Tipo Personalizzazione
             </label>
             <select
               value={dateTimeConfig.mode}
               onChange={handleSubModeChange}
               disabled={isRunning}
-              className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+              className="w-full px-3 py-2.5 bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <option value="today-fixed">Data odierna + Ora fissa</option>
               <option value="today-current">Data odierna + Ora attuale</option>
@@ -137,36 +137,38 @@ function DateTimeConfigPanel() {
 
           {/* Custom Date Input */}
           {needsCustomDate && (
-            <div className="space-y-1.5">
-              <label className="block text-caption font-medium text-gray-300">
+            <div className="space-y-2">
+              <label className="block text-caption-upper text-gray-400">
                 Data Personalizzata
               </label>
-              <div className="relative">
+              <div className="win11-input-wrapper">
                 <input
                   type="date"
                   value={dateTimeConfig.customDate || ''}
                   onChange={handleCustomDateChange}
                   disabled={isRunning}
-                  className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+                  className="win11-input disabled:opacity-50 disabled:cursor-not-allowed"
                 />
+                <div className="win11-input-accent-line"></div>
               </div>
             </div>
           )}
 
           {/* Fixed Time Input */}
           {needsFixedTime && (
-            <div className="space-y-1.5">
-              <label className="block text-caption font-medium text-gray-300">
+            <div className="space-y-2">
+              <label className="block text-caption-upper text-gray-400">
                 Ora Fissa
               </label>
-              <div className="relative">
+              <div className="win11-input-wrapper">
                 <input
                   type="time"
                   value={dateTimeConfig.fixedTime || '20:00'}
                   onChange={handleFixedTimeChange}
                   disabled={isRunning}
-                  className="w-full px-3 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg text-sm text-gray-100 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/30 focus:bg-gray-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner-soft"
+                  className="win11-input disabled:opacity-50 disabled:cursor-not-allowed"
                 />
+                <div className="win11-input-accent-line"></div>
               </div>
             </div>
           )}
@@ -174,7 +176,7 @@ function DateTimeConfigPanel() {
       )}
 
       {/* Info Text */}
-      <div className="flex items-start gap-2 p-2.5 bg-accent-blue/10 border border-accent-blue/20 rounded-lg">
+      <div className="flex items-start gap-2 p-2.5 bg-accent-blue/10 border border-accent-blue/20 rounded-xl">
         <svg
           className="w-3.5 h-3.5 text-accent-blue flex-shrink-0 mt-0.5"
           fill="none"

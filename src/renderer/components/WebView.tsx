@@ -179,7 +179,7 @@ export default function WebView(_props: WebViewProps) {
     }
 
     return (
-      <div key={step} className="flex items-center gap-3 p-2 rounded-lg">
+      <div key={step} className="flex items-center gap-3 p-2 rounded-xl">
         {status === 'completed' && (
           <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -219,7 +219,7 @@ export default function WebView(_props: WebViewProps) {
         {/* Header with Logo and Status */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-blue to-blue-700 flex items-center justify-center shadow-glow-blue">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent-blue to-blue-700 flex items-center justify-center shadow-glow-blue">
               <svg
                 className="w-7 h-7 text-white"
                 fill="none"
@@ -253,7 +253,7 @@ export default function WebView(_props: WebViewProps) {
         </div>
 
         {/* Main Progress Section */}
-        <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 shadow-soft-lg">
+        <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-soft-lg">
           <div className="space-y-6">
             {/* Progress Stats */}
             <div className="flex justify-between items-center">
@@ -270,7 +270,7 @@ export default function WebView(_props: WebViewProps) {
             </div>
 
             {/* Large Progress Bar */}
-            <div className="relative w-full bg-gray-800/50 rounded-full h-6 overflow-hidden shadow-inner-soft border border-gray-700/30">
+            <div className="relative w-full bg-gray-800/50 rounded-full h-8 overflow-hidden shadow-inner-soft border-2 border-gray-700/30">
               <div
                 className="h-full bg-gradient-to-r from-accent-blue via-blue-500 to-accent-purple transition-all duration-500 ease-out shadow-glow-blue relative overflow-hidden"
                 style={{ width: `${percentage}%` }}
@@ -284,7 +284,7 @@ export default function WebView(_props: WebViewProps) {
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-4 pt-2">
               {/* Success */}
-              <div className="bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-xl p-4 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-green-900/20 to-green-800/10 border border-green-700/30 rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -297,7 +297,7 @@ export default function WebView(_props: WebViewProps) {
               </div>
 
               {/* Errors */}
-              <div className="bg-gradient-to-br from-red-900/30 to-red-800/20 border border-red-700/50 rounded-xl p-4 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-red-900/20 to-red-800/10 border border-red-700/30 rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -310,7 +310,7 @@ export default function WebView(_props: WebViewProps) {
               </div>
 
               {/* Elapsed Time */}
-              <div className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-xl p-4 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/10 border border-blue-700/30 rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -327,7 +327,7 @@ export default function WebView(_props: WebViewProps) {
 
         {/* Current MRN Processing Section */}
         {isRunning && currentMRN && (
-          <div className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 backdrop-blur-sm border border-purple-700/50 rounded-2xl p-6 shadow-soft-lg animate-fade-in">
+          <div className="bg-gradient-to-br from-purple-900/20 to-purple-800/10 backdrop-blur-xl border border-purple-700/30 rounded-3xl p-6 shadow-soft-lg animate-fade-in">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -341,7 +341,7 @@ export default function WebView(_props: WebViewProps) {
             </div>
 
             {/* MRN Display */}
-            <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
+            <div className="mb-4 p-3 bg-gray-800/50 rounded-xl border border-gray-700/30">
               <p className="text-xs text-gray-400 mb-1">MRN in elaborazione</p>
               <p className="text-xl font-mono font-bold text-purple-300">{currentMRN}</p>
             </div>
@@ -365,7 +365,7 @@ export default function WebView(_props: WebViewProps) {
         )}
 
         {/* Recent Activity */}
-        <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 shadow-soft-lg">
+        <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-6 shadow-soft-lg">
           <div className="flex items-center gap-2 mb-4">
             <svg className="w-5 h-5 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -385,7 +385,7 @@ export default function WebView(_props: WebViewProps) {
               {logs.slice(0, 5).map((log) => (
                 <div
                   key={log.id}
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-700/30 border border-transparent hover:border-gray-700/50 transition-all"
+                  className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-700/30 border border-transparent hover:border-gray-700/30 transition-all"
                 >
                   <div className={`${getLogColor(log.type)} flex-shrink-0 mt-0.5`}>
                     {getLogIcon(log.type)}
