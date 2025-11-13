@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Auto-T1</title>
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -16,7 +12,7 @@
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', 'Roboto', sans-serif;
       background: linear-gradient(135deg, #0a0c0f 0%, #111318 50%, #1a1d23 100%);
       display: flex;
       align-items: center;
@@ -36,7 +32,7 @@
       width: 64px;
       height: 64px;
       margin: 0 auto 20px;
-      border-radius: 16px;
+      border-radius: 20px;
       background: linear-gradient(135deg, #0078D4 0%, #1d4ed8 100%);
       display: flex;
       align-items: center;
@@ -64,20 +60,22 @@
     }
 
     .subtitle {
-      font-size: 14px;
+      font-size: 11px;
       color: #9ca3af;
       font-weight: 500;
       margin-bottom: 32px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
     /* Modern Loading Bar */
     .loading-bar-container {
       width: 280px;
-      height: 4px;
+      height: 6px;
       margin: 0 auto 16px;
       background: rgba(75, 85, 99, 0.3);
-      border-radius: 2px;
+      border-radius: 3px;
+      border: 1px solid rgba(75, 85, 99, 0.3);
       overflow: hidden;
       box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
     }
@@ -86,7 +84,7 @@
       height: 100%;
       width: 100%;
       background: linear-gradient(90deg, #0078D4 0%, #3b82f6 50%, #8E8CD8 100%);
-      border-radius: 2px;
+      border-radius: 3px;
       position: relative;
       animation: loading-shimmer 1.5s ease-in-out infinite;
       box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
