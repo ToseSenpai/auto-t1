@@ -3,6 +3,10 @@ export default {
   content: ["./src/renderer/**/*.{js,ts,jsx,tsx}", "./index.html"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', 'monospace'],
+      },
       colors: {
         // Windows 11-inspired primary blue
         primary: {
