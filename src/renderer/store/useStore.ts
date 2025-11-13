@@ -24,6 +24,26 @@ export interface DateTimeConfig {
   fixedTime?: string; // Format: HH:MM (only if mode includes 'fixed')
 }
 
+/**
+ * MRN Processing Step
+ * Rappresenta i vari step dell'automazione per ogni MRN
+ */
+export type MRNProcessingStep =
+  | 'initializing'           // Pre-login
+  | 'logging-in'            // Login action
+  | 'navigating'            // Navigate to Dichiarazioni
+  | 'creating-declaration'  // Click "Nuova dichiarazione"
+  | 'selecting-ncts'        // Click NCTS
+  | 'selecting-mxdhl'       // Click MX DHL
+  | 'confirming'            // Click OK
+  | 'loading-page'          // Wait for page load
+  | 'filling-mrn'           // Fill MRN field
+  | 'verifying-sede'        // Verify Sede destinazione
+  | 'filling-datetime'      // Fill arrival date/time
+  | 'sending'               // Click Send button
+  | 'completed'             // MRN completed
+  | 'error';                // Error occurred
+
 interface AutomationState {
   // Status
   isRunning: boolean;
@@ -49,6 +69,11 @@ interface AutomationState {
   // Logs
   logs: LogEntry[];
 
+  // MRN Tracking
+  currentMRN: string | null;
+  currentMRNIndex: number;
+  currentStep: MRNProcessingStep | null;
+
   // Actions
   setUsername: (username: string) => void;
   setPassword: (password: string) => void;
@@ -60,6 +85,8 @@ interface AutomationState {
   setProgress: (current: number, total: number) => void;
   addLog: (type: LogEntry["type"], message: string) => void;
   clearLogs: () => void;
+  setCurrentMRN: (mrn: string | null, index: number) => void;
+  setCurrentStep: (step: MRNProcessingStep | null) => void;
   reset: () => void;
 }
 
@@ -80,6 +107,9 @@ export const useStore = create<AutomationState>((set, get) => ({
   successCount: 0,
   errorCount: 0,
   logs: [],
+  currentMRN: null,
+  currentMRNIndex: 0,
+  currentStep: null,
 
   // Actions
   setUsername: (username) => set({ username }),
@@ -96,7 +126,13 @@ export const useStore = create<AutomationState>((set, get) => ({
   },
 
   stopAutomation: () => {
-    set({ isRunning: false, isPaused: false });
+    set({
+      isRunning: false,
+      isPaused: false,
+      currentMRN: null,
+      currentMRNIndex: 0,
+      currentStep: null
+    });
     get().addLog("warning", "Automazione fermata");
   },
 
@@ -132,6 +168,10 @@ export const useStore = create<AutomationState>((set, get) => ({
 
   clearLogs: () => set({ logs: [] }),
 
+  setCurrentMRN: (mrn, index) => set({ currentMRN: mrn, currentMRNIndex: index }),
+
+  setCurrentStep: (step) => set({ currentStep: step }),
+
   reset: () =>
     set({
       isRunning: false,
@@ -142,5 +182,8 @@ export const useStore = create<AutomationState>((set, get) => ({
       successCount: 0,
       errorCount: 0,
       logs: [],
+      currentMRN: null,
+      currentMRNIndex: 0,
+      currentStep: null,
     }),
 }));

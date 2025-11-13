@@ -163,6 +163,18 @@ function setupIPCHandlers() {
     // Nota: Playwright è in modalità headless
     // Il webview in React mostrerà about:blank fino a quando l'automazione carica una pagina
 
+    // Emit initializing step
+    mainWindow?.webContents.send("automation:mrn-step", {
+      step: "initializing",
+      message: "Inizializzazione automazione...",
+    });
+
+    // Emit logging-in step
+    mainWindow?.webContents.send("automation:mrn-step", {
+      step: "logging-in",
+      message: "Login in corso...",
+    });
+
     // Login
     const loginSuccess = await webAutomation.login();
     if (!loginSuccess) {
@@ -173,6 +185,12 @@ function setupIPCHandlers() {
     mainWindow?.webContents.send("automation:status", {
       type: "info",
       message: "Login completato con successo",
+    });
+
+    // Emit navigating step
+    mainWindow?.webContents.send("automation:mrn-step", {
+      step: "navigating",
+      message: "Navigazione a Dichiarazioni...",
     });
 
     // Naviga a Dichiarazioni dopo il login
@@ -189,6 +207,12 @@ function setupIPCHandlers() {
     mainWindow?.webContents.send("automation:status", {
       type: "success",
       message: "Navigato a Dichiarazioni con successo",
+    });
+
+    // Emit creating-declaration step
+    mainWindow?.webContents.send("automation:mrn-step", {
+      step: "creating-declaration",
+      message: "Click su 'Nuova dichiarazione'...",
     });
 
     // Click su "Nuova dichiarazione"
@@ -221,9 +245,22 @@ function setupIPCHandlers() {
       const currentMRN = mrnValues[mrnIndex];
       const mrnProgress = `[${mrnIndex + 1}/${totalMRNs}]`;
 
+      // Emit MRN start event
+      mainWindow?.webContents.send("automation:mrn-start", {
+        mrn: currentMRN,
+        index: mrnIndex + 1,
+        total: totalMRNs,
+      });
+
       mainWindow?.webContents.send("automation:status", {
         type: "info",
         message: `${mrnProgress} Inizio elaborazione MRN: ${currentMRN}`,
+      });
+
+      // Emit selecting-ncts step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "selecting-ncts",
+        message: "Selezione NCTS...",
       });
 
       // Click su NCTS Arrival Notification IT (step 1)
@@ -244,6 +281,12 @@ function setupIPCHandlers() {
 
       // Delay per rallentare la macro
       await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Emit selecting-mxdhl step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "selecting-mxdhl",
+        message: "Selezione MX DHL...",
+      });
 
       // Click su MX DHL (step 2)
       mainWindow?.webContents.send("automation:status", {
@@ -267,6 +310,12 @@ function setupIPCHandlers() {
       // Delay per rallentare la macro
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // Emit confirming step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "confirming",
+        message: "Conferma selezione...",
+      });
+
       // Click su OK conferma (step 3)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -285,6 +334,12 @@ function setupIPCHandlers() {
 
       // Delay per rallentare la macro
       await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Emit loading-page step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "loading-page",
+        message: "Caricamento pagina...",
+      });
 
       // Attendi caricamento nuova pagina (step 4)
       mainWindow?.webContents.send("automation:status", {
@@ -308,6 +363,12 @@ function setupIPCHandlers() {
       // Delay per rallentare la macro
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // Emit filling-mrn step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "filling-mrn",
+        message: "Compilazione MRN...",
+      });
+
       // Compila campo MRN (step 5)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -329,6 +390,12 @@ function setupIPCHandlers() {
 
       // Delay per rallentare la macro
       await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Emit verifying-sede step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "verifying-sede",
+        message: "Verifica sede destinazione...",
+      });
 
       // Verifica campo Sede di destinazione (step 6)
       mainWindow?.webContents.send("automation:status", {
@@ -352,6 +419,12 @@ function setupIPCHandlers() {
       // Delay per rallentare la macro
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // Emit filling-datetime step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "filling-datetime",
+        message: "Compilazione data/ora...",
+      });
+
       // Compila campo Data/Ora di arrivo (step 7)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -374,6 +447,12 @@ function setupIPCHandlers() {
       // Delay per rallentare la macro
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      // Emit sending step
+      mainWindow?.webContents.send("automation:mrn-step", {
+        step: "sending",
+        message: "Invio dichiarazione...",
+      });
+
       // Clicca su bottone "Invia" (step 8)
       mainWindow?.webContents.send("automation:status", {
         type: "info",
@@ -391,6 +470,12 @@ function setupIPCHandlers() {
       mainWindow?.webContents.send("automation:status", {
         type: "success",
         message: `${mrnProgress} Dichiarazione inviata con successo per MRN: ${currentMRN}`,
+      });
+
+      // Emit MRN complete event
+      mainWindow?.webContents.send("automation:mrn-complete", {
+        mrn: currentMRN,
+        success: true,
       });
 
       // Delay per rallentare la macro

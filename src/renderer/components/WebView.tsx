@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useStore } from "../store/useStore";
+import { useStore, type MRNProcessingStep } from "../store/useStore";
 
 interface WebViewProps {
   initialUrl?: string;
@@ -14,6 +14,11 @@ export default function WebView(_props: WebViewProps) {
   const successCount = useStore((state) => state.successCount);
   const errorCount = useStore((state) => state.errorCount);
   const logs = useStore((state) => state.logs);
+  const currentMRN = useStore((state) => state.currentMRN);
+  const currentMRNIndex = useStore((state) => state.currentMRNIndex);
+  const currentStep = useStore((state) => state.currentStep);
+  const setCurrentMRN = useStore((state) => state.setCurrentMRN);
+  const setCurrentStep = useStore((state) => state.setCurrentStep);
 
   // Track elapsed time
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -36,6 +41,37 @@ export default function WebView(_props: WebViewProps) {
     }
     return undefined;
   }, [isRunning, isPaused, startTime]);
+
+  // Listen for MRN tracking events
+  useEffect(() => {
+    const handleMRNStart = (data: { mrn: string; index: number; total: number }) => {
+      setCurrentMRN(data.mrn, data.index);
+      setCurrentStep('initializing');
+    };
+
+    const handleMRNStep = (data: { step: MRNProcessingStep; message: string }) => {
+      setCurrentStep(data.step);
+    };
+
+    const handleMRNComplete = (data: { mrn: string; success: boolean; error?: string }) => {
+      setCurrentStep(data.success ? 'completed' : 'error');
+      // Clear after 2 seconds
+      setTimeout(() => {
+        setCurrentMRN(null, 0);
+        setCurrentStep(null);
+      }, 2000);
+    };
+
+    window.electronAPI.onMRNStart(handleMRNStart);
+    window.electronAPI.onMRNStep(handleMRNStep);
+    window.electronAPI.onMRNComplete(handleMRNComplete);
+
+    return () => {
+      window.electronAPI.removeMRNStartListener();
+      window.electronAPI.removeMRNStepListener();
+      window.electronAPI.removeMRNCompleteListener();
+    };
+  }, [setCurrentMRN, setCurrentStep]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -113,6 +149,68 @@ export default function WebView(_props: WebViewProps) {
           </svg>
         );
     }
+  };
+
+  const renderStep = (
+    step: MRNProcessingStep,
+    label: string,
+    _currentStep: MRNProcessingStep | null
+  ) => {
+    const stepOrder: MRNProcessingStep[] = [
+      'initializing', 'logging-in', 'navigating', 'creating-declaration',
+      'selecting-ncts', 'selecting-mxdhl', 'confirming', 'loading-page',
+      'filling-mrn', 'verifying-sede', 'filling-datetime', 'sending'
+    ];
+
+    const currentIndex = _currentStep ? stepOrder.indexOf(_currentStep) : -1;
+    const stepIndex = stepOrder.indexOf(step);
+
+    let status: 'completed' | 'in-progress' | 'pending' | 'error';
+    if (_currentStep === 'error' && stepIndex === currentIndex) {
+      status = 'error';
+    } else if (_currentStep === 'completed') {
+      status = 'completed';
+    } else if (stepIndex < currentIndex) {
+      status = 'completed';
+    } else if (stepIndex === currentIndex) {
+      status = 'in-progress';
+    } else {
+      status = 'pending';
+    }
+
+    return (
+      <div key={step} className="flex items-center gap-3 p-2 rounded-lg">
+        {status === 'completed' && (
+          <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+        )}
+        {status === 'in-progress' && (
+          <svg className="w-5 h-5 text-blue-400 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        )}
+        {status === 'pending' && (
+          <svg className="w-5 h-5 text-gray-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clipRule="evenodd" />
+          </svg>
+        )}
+        {status === 'error' && (
+          <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+        )}
+        <p className={`text-sm ${
+          status === 'completed' ? 'text-green-400' :
+          status === 'in-progress' ? 'text-blue-400 font-semibold' :
+          status === 'error' ? 'text-red-400' :
+          'text-gray-600'
+        }`}>
+          {label}
+        </p>
+      </div>
+    );
   };
 
   return (
@@ -227,6 +325,45 @@ export default function WebView(_props: WebViewProps) {
           </div>
         </div>
 
+        {/* Current MRN Processing Section */}
+        {isRunning && currentMRN && (
+          <div className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 backdrop-blur-sm border border-purple-700/50 rounded-2xl p-6 shadow-soft-lg animate-fade-in">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-200">Elaborazione MRN Corrente</h3>
+              </div>
+              <span className="text-sm text-purple-400 font-mono font-semibold">
+                [{currentMRNIndex}/{total}]
+              </span>
+            </div>
+
+            {/* MRN Display */}
+            <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
+              <p className="text-xs text-gray-400 mb-1">MRN in elaborazione</p>
+              <p className="text-xl font-mono font-bold text-purple-300">{currentMRN}</p>
+            </div>
+
+            {/* Step Progress */}
+            <div className="space-y-1">
+              {renderStep('initializing', 'Inizializzazione', currentStep)}
+              {renderStep('logging-in', 'Login', currentStep)}
+              {renderStep('navigating', 'Navigazione a Dichiarazioni', currentStep)}
+              {renderStep('creating-declaration', 'Nuova dichiarazione', currentStep)}
+              {renderStep('selecting-ncts', 'Selezione NCTS', currentStep)}
+              {renderStep('selecting-mxdhl', 'Selezione MX DHL', currentStep)}
+              {renderStep('confirming', 'Conferma selezione', currentStep)}
+              {renderStep('loading-page', 'Caricamento pagina', currentStep)}
+              {renderStep('filling-mrn', 'Compilazione MRN', currentStep)}
+              {renderStep('verifying-sede', 'Verifica sede destinazione', currentStep)}
+              {renderStep('filling-datetime', 'Compilazione data/ora', currentStep)}
+              {renderStep('sending', 'Invio dichiarazione', currentStep)}
+            </div>
+          </div>
+        )}
+
         {/* Recent Activity */}
         <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 shadow-soft-lg">
           <div className="flex items-center gap-2 mb-4">
@@ -244,7 +381,7 @@ export default function WebView(_props: WebViewProps) {
               <p className="text-sm">Nessuna attività da visualizzare</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="space-y-2 max-h-40 overflow-y-auto">
               {logs.slice(0, 5).map((log) => (
                 <div
                   key={log.id}

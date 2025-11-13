@@ -96,6 +96,26 @@ export interface DateTimeConfig {
   fixedTime?: string; // Format: HH:MM (only if mode includes 'fixed')
 }
 
+/**
+ * MRN Processing Step
+ * Rappresenta i vari step dell'automazione per ogni MRN
+ */
+export type MRNProcessingStep =
+  | 'initializing'           // Pre-login
+  | 'logging-in'            // Login action
+  | 'navigating'            // Navigate to Dichiarazioni
+  | 'creating-declaration'  // Click "Nuova dichiarazione"
+  | 'selecting-ncts'        // Click NCTS
+  | 'selecting-mxdhl'       // Click MX DHL
+  | 'confirming'            // Click OK
+  | 'loading-page'          // Wait for page load
+  | 'filling-mrn'           // Fill MRN field
+  | 'verifying-sede'        // Verify Sede destinazione
+  | 'filling-datetime'      // Fill arrival date/time
+  | 'sending'               // Click Send button
+  | 'completed'             // MRN completed
+  | 'error';                // Error occurred
+
 // ElectronAPI interface matching preload.ts
 export interface ElectronAPI {
   selectExcelFile: () => Promise<{
@@ -127,8 +147,20 @@ export interface ElectronAPI {
   onProgress: (
     callback: (data: { current: number; total: number; rowData: any }) => void
   ) => void;
+  onMRNStart: (
+    callback: (data: { mrn: string; index: number; total: number }) => void
+  ) => void;
+  onMRNStep: (
+    callback: (data: { step: MRNProcessingStep; message: string }) => void
+  ) => void;
+  onMRNComplete: (
+    callback: (data: { mrn: string; success: boolean; error?: string }) => void
+  ) => void;
   removeStatusListener: () => void;
   removeProgressListener: () => void;
+  removeMRNStartListener: () => void;
+  removeMRNStepListener: () => void;
+  removeMRNCompleteListener: () => void;
 }
 
 declare global {
