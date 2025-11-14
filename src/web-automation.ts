@@ -2153,25 +2153,34 @@ export class WebAutomation {
     }
 
     try {
-      // Strategia: trova pulsante tramite ID univoco "send"
-      const buttonInfo = await this.page.evaluate(() => {
+      // Strategia: trova pulsante tramite ID univoco "send" e aspetta che diventi enabled
+      const buttonInfo = await this.page.evaluate(async () => {
         const inviaButton = document.getElementById('send') as any;
 
         if (!inviaButton) {
           return { found: false, error: 'Pulsante #send non trovato' };
         }
 
-        // Verifica se il pulsante è disabilitato
-        const isDisabled = inviaButton.hasAttribute('disabled') || inviaButton.disabled;
+        // Wait loop: aspetta max 5 secondi che il pulsante diventi enabled
+        let attempts = 0;
+        const maxAttempts = 10; // 10 x 500ms = 5 secondi
 
-        if (isDisabled) {
-          return { found: true, disabled: true, error: 'Pulsante disabilitato' };
+        while (attempts < maxAttempts) {
+          const isDisabled = inviaButton.hasAttribute('disabled') || inviaButton.disabled;
+
+          if (!isDisabled) {
+            // Pulsante enabled! Click
+            inviaButton.click();
+            return { found: true, disabled: false, clicked: true, attempts };
+          }
+
+          // Aspetta 500ms e riprova
+          await new Promise(resolve => setTimeout(resolve, 500));
+          attempts++;
         }
 
-        // Click sul pulsante
-        inviaButton.click();
-
-        return { found: true, disabled: false, clicked: true };
+        // Timeout: pulsante rimasto disabilitato dopo 5 secondi
+        return { found: true, disabled: true, error: 'Pulsante rimasto disabilitato dopo 5s', attempts };
       });
 
       console.log('Risultato ricerca pulsante:', buttonInfo);
