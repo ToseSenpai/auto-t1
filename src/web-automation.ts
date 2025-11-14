@@ -2154,34 +2154,74 @@ export class WebAutomation {
 
     try {
       // Strategia: trova vaadin-button con classe button-prominent e testo "Invia"
-      const inviaButtonClicked = await this.page.evaluate(() => {
+      const buttonInfo = await this.page.evaluate(() => {
         const buttons = Array.from(
           document.querySelectorAll('vaadin-button.button-prominent')
         );
 
         const inviaButton = buttons.find(btn =>
           btn.textContent?.trim() === 'Invia'
-        );
+        ) as any;
 
-        if (inviaButton) {
-          (inviaButton as HTMLElement).click();
-          return true;
+        if (!inviaButton) {
+          return { found: false, error: 'Pulsante non trovato' };
         }
-        return false;
+
+        // Verifica se il pulsante è disabilitato
+        const isDisabled = inviaButton.hasAttribute('disabled') || inviaButton.disabled;
+
+        if (isDisabled) {
+          return { found: true, disabled: true, error: 'Pulsante disabilitato' };
+        }
+
+        // Click sul pulsante
+        inviaButton.click();
+
+        return { found: true, disabled: false, clicked: true };
       });
 
-      if (!inviaButtonClicked) {
+      console.log('Risultato ricerca pulsante:', buttonInfo);
+
+      if (!buttonInfo.found) {
         console.error('Pulsante "Invia" non trovato');
         await this.takeScreenshot('invia_button_not_found');
+        return false;
+      }
+
+      if (buttonInfo.disabled) {
+        console.error('Pulsante "Invia" è disabilitato');
+        await this.takeScreenshot('invia_button_disabled');
+        return false;
+      }
+
+      if (!buttonInfo.clicked) {
+        console.error('Click su "Invia" fallito');
+        await this.takeScreenshot('invia_button_click_failed');
         return false;
       }
 
       console.log('✓ Pulsante "Invia" cliccato');
       await this.takeScreenshot('invia_button_clicked');
 
-      // Wait per redirect a /cm/declarations
-      await this.page.waitForURL('**/cm/declarations', { timeout: 10000 });
-      console.log('✓ Redirect a /cm/declarations completato');
+      // Wait per VERA navigazione (non solo verifica URL)
+      try {
+        console.log('Attesa navigazione a /cm/declarations...');
+        await Promise.race([
+          this.page.waitForNavigation({ timeout: 10000 }),
+          this.page.waitForURL('**/cm/declarations', { timeout: 10000 })
+        ]);
+        console.log('✓ Navigazione completata');
+      } catch (navError) {
+        console.warn('Timeout navigazione - verifico URL corrente');
+        const currentUrl = this.page.url();
+        console.log('URL corrente:', currentUrl);
+
+        if (!currentUrl.includes('/cm/declarations')) {
+          console.error('Navigazione fallita - URL non corretto');
+          await this.takeScreenshot('invia_navigation_failed');
+          return false;
+        }
+      }
 
       await this.page.waitForTimeout(1000);
 
