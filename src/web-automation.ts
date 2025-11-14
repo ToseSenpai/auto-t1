@@ -2072,53 +2072,67 @@ export class WebAutomation {
     try {
       // ID del vaadin-combo-box
       const comboBoxId = 'com.kewill.kcm.nctsit.NCTSUnloadingRemarksIT.GoodsDeclaration.UnloadingRemark.StateOfSealsOk';
-      const selector = `#${comboBoxId}`;
 
-      // 1. Wait per visibilità del combo-box
-      await this.page.waitForSelector(selector, { state: 'visible', timeout: 5000 });
-      console.log('✓ Combo-box trovato e visibile');
+      // Usa lo stesso approccio di fillMRNField: accedi al Shadow DOM e setta valore
+      const fieldInfo = await this.page.evaluate((params: { cbId: string; val: string }) => {
+        const comboBox = document.getElementById(params.cbId) as any;
 
-      // 2. Click sul combo-box per attivarlo
-      await this.page.click(selector);
-      await this.page.waitForTimeout(300);
-
-      // 3. Focus sull'input interno
-      const inputSelector = `${selector} input`;
-      await this.page.focus(inputSelector);
-
-      // 4. Clear eventuali valori esistenti
-      await this.page.evaluate((sel: string) => {
-        const input = document.querySelector(sel) as HTMLInputElement;
-        if (input) {
-          input.value = '';
+        if (!comboBox) {
+          return { success: false, error: 'Combo-box non trovato' };
         }
-      }, inputSelector);
 
-      // 5. Type "1" come input da tastiera
-      await this.page.type(inputSelector, '1', { delay: 100 });
-      await this.page.waitForTimeout(200);
-      console.log('✓ Valore "1" digitato nel combo-box');
+        // Setta il valore sul combo-box
+        comboBox.value = params.val;
 
-      // 6. Press Enter per confermare la selezione
-      await this.page.keyboard.press('Enter');
-      await this.page.waitForTimeout(500);
+        // Accedi al Shadow DOM per settare anche l'input interno
+        if (comboBox.shadowRoot) {
+          const textField = comboBox.shadowRoot.querySelector('vaadin-text-field');
+          if (textField && (textField as any).shadowRoot) {
+            const input = (textField as any).shadowRoot.querySelector('input');
+            if (input) {
+              (input as HTMLInputElement).value = params.val;
+              // Dispatch eventi sull'input interno
+              input.dispatchEvent(new Event("input", { bubbles: true }));
+              input.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+          }
+        }
 
-      // 7. Verifica che il valore sia stato settato correttamente
-      const valueSet = await this.page.evaluate((cbId: string) => {
-        const comboBox = document.getElementById(cbId) as any;
-        return comboBox?.value === "1";
-      }, comboBoxId);
+        // Dispatch eventi sul componente Vaadin (con composed=true per Shadow DOM)
+        comboBox.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+        comboBox.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+        comboBox.dispatchEvent(new Event("blur", { bubbles: true }));
 
-      if (!valueSet) {
-        console.error('Campo "Stato dei sigilli OK" non settato correttamente dopo digitazione');
+        // Verifica che il valore sia stato settato
+        const actualValue = comboBox.value;
+
+        return {
+          success: true,
+          actualValue: actualValue,
+          expected: params.val
+        };
+      }, { cbId: comboBoxId, val: "1" });
+
+      if (fieldInfo.success) {
+        console.log(`✓ Campo "Stato dei sigilli OK" trovato`);
+        console.log(`  Valore settato: ${fieldInfo.actualValue}`);
+        console.log(`  Valore atteso: ${fieldInfo.expected}`);
+
+        if (fieldInfo.actualValue === fieldInfo.expected) {
+          console.log(`✓ Verifica valore OK`);
+          await this.takeScreenshot('seal_status_combobox_filled');
+          await this.page.waitForTimeout(500);
+          return true;
+        } else {
+          console.warn(`⚠ Valore non corrispondente! Atteso: "${fieldInfo.expected}", Trovato: "${fieldInfo.actualValue}"`);
+          await this.takeScreenshot('seal_status_combobox_value_mismatch');
+          return false;
+        }
+      } else {
+        console.error(`Errore: ${fieldInfo.error}`);
         await this.takeScreenshot('seal_status_combobox_error');
         return false;
       }
-
-      console.log('✓ Campo "Stato dei sigilli OK" compilato con valore "1"');
-      await this.takeScreenshot('seal_status_combobox_filled');
-
-      return true;
     } catch (error) {
       console.error('Errore compilazione campo "Stato dei sigilli OK":', error);
       await this.takeScreenshot('seal_status_combobox_exception');
