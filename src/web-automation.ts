@@ -2141,6 +2141,45 @@ export class WebAutomation {
   }
 
   /**
+   * Click sul pulsante "Invia" e attende redirect a /cm/declarations
+   * @returns true se click riuscito e redirect completato, false altrimenti
+   */
+  async clickInviaButton(): Promise<boolean> {
+    console.log('Click su pulsante "Invia"...');
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      // ID del pulsante Invia
+      const buttonSelector = '#send';
+
+      // Wait per visibilità del pulsante
+      await this.page.waitForSelector(buttonSelector, { state: 'visible', timeout: 5000 });
+      console.log('✓ Pulsante "Invia" trovato e visibile');
+
+      // Click sul pulsante
+      await this.page.click(buttonSelector);
+      console.log('✓ Click su "Invia" eseguito');
+
+      // Wait per redirect a /cm/declarations
+      await this.page.waitForURL('**/cm/declarations', { timeout: 10000 });
+      console.log('✓ Redirect a /cm/declarations completato');
+
+      await this.takeScreenshot('invia_button_success');
+      await this.page.waitForTimeout(1000);
+
+      return true;
+    } catch (error) {
+      console.error('Errore click pulsante "Invia":', error);
+      await this.takeScreenshot('invia_button_error');
+      return false;
+    }
+  }
+
+  /**
    * Getter per verificare se l'utente è loggato
    */
   get loggedIn(): boolean {

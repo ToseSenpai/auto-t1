@@ -1131,12 +1131,25 @@ ipcMain.handle("automation:part3-search-only", async (_: any, data: any) => {
         continue;
       }
 
-      // STOP finale - verifica valore inserito
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Step 9: Click pulsante "Invia" e attendi redirect
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: 'Click su pulsante "Invia"...',
+      });
 
+      const inviaClicked = await webAutomation.clickInviaButton();
+      if (!inviaClicked) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "error",
+          message: `Impossibile cliccare "Invia" per MRN: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // MRN completato con successo
       mainWindow?.webContents.send("automation:status", {
         type: "success",
-        message: `✓ Campo "Stato dei sigilli OK" compilato per MRN: ${currentMRN}. In pausa per verifica...`,
+        message: `✓ MRN ${currentMRN} completato con successo! Redirect a /cm/declarations effettuato.`,
       });
 
       processedCount++;
@@ -1145,7 +1158,7 @@ ipcMain.handle("automation:part3-search-only", async (_: any, data: any) => {
     // Completamento
     mainWindow?.webContents.send("automation:status", {
       type: "success",
-      message: `Test completato! ${processedCount}/${totalMRNs} MRN cercati. Browser lasciato aperto per verifica manuale.`,
+      message: `Automazione completata! ${processedCount}/${totalMRNs} MRN processati con successo. Browser lasciato aperto per verifica.`,
     });
 
     // NON chiudere il browser per permettere verifica manuale
