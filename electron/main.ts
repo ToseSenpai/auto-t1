@@ -1006,12 +1006,77 @@ ipcMain.handle("automation:part3-search-only", async (_: any, data: any) => {
         continue;
       }
 
-      // STOP QUI - Attendi 3 secondi per visualizzare risultati
+      // Attendi caricamento risultati
       await new Promise(resolve => setTimeout(resolve, 3000));
 
+      // Estrai risultati dalla tabella
+      const tableResults = await webAutomation.extractTableResults(currentMRN);
+
+      if (!tableResults || tableResults.length === 0) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `Nessun risultato trovato per MRN: ${currentMRN}`,
+        });
+        continue; // Passa al prossimo MRN
+      }
+
+      // Analizza colonna "Nome Messaggio"
+      const nomeMessaggioValues = new Set(
+        tableResults.map(row => row.nomeMessaggio)
+      );
+
+      // Log valori trovati
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: `Trovati ${tableResults.length} risultati. Nome Messaggio: ${Array.from(nomeMessaggioValues).join(", ")}`,
+      });
+
+      // DECISIONE: Verifica se MRN già scaricato
+      const hasNCTSArrival = nomeMessaggioValues.has("NCTS Arrival Notification IT");
+      const hasNCTSUnloading = nomeMessaggioValues.has("NCTS Unloading Remarks IT");
+
+      if (hasNCTSArrival && hasNCTSUnloading) {
+        // CASO B: MRN già scaricato
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `⏭ MRN già scaricato (trovato NCTS Unloading Remarks): ${currentMRN}`,
+        });
+        processedCount++;
+        continue; // Skip questo MRN
+      }
+
+      if (!hasNCTSArrival) {
+        // CASO C: Nessun NCTS Arrival trovato
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `⚠ NCTS Arrival Notification non trovato per MRN: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // CASO A: Solo NCTS Arrival → vai avanti con click
       mainWindow?.webContents.send("automation:status", {
         type: "success",
-        message: `Ricerca completata per MRN: ${currentMRN}`,
+        message: `✓ MRN valido. Procedo con apertura dichiarazione: ${currentMRN}`,
+      });
+
+      // Double-click su cella NCTS Arrival Notification IT
+      const clicked = await webAutomation.doubleClickNCTSArrival(currentMRN);
+
+      if (!clicked) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "error",
+          message: `Impossibile aprire dichiarazione per MRN: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // STOP - Delay per verifica manuale
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: `Dichiarazione aperta per MRN: ${currentMRN}. In pausa per verifica...`,
       });
 
       processedCount++;

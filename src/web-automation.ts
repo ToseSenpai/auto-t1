@@ -1846,6 +1846,86 @@ export class WebAutomation {
   }
 
   /**
+   * Double-click sulla cella "NCTS Arrival Notification IT" per aprire la dichiarazione
+   * @param mrn MRN da cercare nella tabella
+   * @returns true se click riuscito, false altrimenti
+   */
+  async doubleClickNCTSArrival(mrn: string): Promise<boolean> {
+    console.log(`Double-click su NCTS Arrival Notification per MRN: ${mrn}`);
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      // Trova la riga con MRN e nomeMessaggio === "NCTS Arrival Notification IT"
+      const cellSlot = await this.page.evaluate((searchMRN: string) => {
+        // Helper per leggere testo cella
+        const getCellText = (index: number): string => {
+          const cell = document.querySelector(
+            `vaadin-grid-cell-content[slot="vaadin-grid-cell-content-${index}"]`
+          );
+          return cell?.textContent?.trim() || '';
+        };
+
+        // Scan max 10 righe
+        for (let rowIndex = 0; rowIndex < 10; rowIndex++) {
+          const baseIndex = rowIndex * 10 + 2;
+
+          // Leggi MRN (col 2)
+          const numeroRegistrazione = getCellText(baseIndex + 2);
+          if (!numeroRegistrazione) break;
+
+          // Leggi Nome Messaggio (col 7)
+          const nomeMessaggio = getCellText(baseIndex + 7);
+
+          // Match: MRN corretto E nome messaggio corretto
+          if (
+            numeroRegistrazione === searchMRN &&
+            nomeMessaggio === "NCTS Arrival Notification IT"
+          ) {
+            // Ritorna lo slot della cella "Nome Messaggio"
+            return baseIndex + 7;
+          }
+        }
+
+        return null; // Non trovato
+      }, mrn);
+
+      if (cellSlot === null) {
+        console.error(`Cella NCTS Arrival non trovata per MRN: ${mrn}`);
+        await this.takeScreenshot("ncts_arrival_not_found");
+        return false;
+      }
+
+      console.log(`Trovata cella NCTS Arrival allo slot: ${cellSlot}`);
+
+      // Selettore dinamico basato su slot trovato
+      const cellSelector = `vaadin-grid-cell-content[slot="vaadin-grid-cell-content-${cellSlot}"]`;
+
+      // Attendi che la cella sia visibile
+      await this.page.waitForSelector(cellSelector, { timeout: 5000 });
+
+      // Double-click sulla cella
+      await this.page.dblclick(cellSelector);
+
+      console.log("✓ Double-click eseguito su cella NCTS Arrival");
+      await this.takeScreenshot("ncts_arrival_clicked");
+
+      // Attendi caricamento pagina dichiarazione
+      await this.page.waitForLoadState("networkidle", { timeout: 10000 });
+      await this.page.waitForTimeout(2000);
+
+      return true;
+    } catch (error) {
+      console.error("Errore durante double-click NCTS Arrival:", error);
+      await this.takeScreenshot("ncts_arrival_click_error");
+      return false;
+    }
+  }
+
+  /**
    * Getter per verificare se l'utente è loggato
    */
   get loggedIn(): boolean {
