@@ -2153,22 +2153,36 @@ export class WebAutomation {
     }
 
     try {
-      // ID del pulsante Invia
-      const buttonSelector = '#send';
+      // Strategia: trova vaadin-button con classe button-prominent e testo "Invia"
+      const inviaButtonClicked = await this.page.evaluate(() => {
+        const buttons = Array.from(
+          document.querySelectorAll('vaadin-button.button-prominent')
+        );
 
-      // Wait per visibilità del pulsante
-      await this.page.waitForSelector(buttonSelector, { state: 'visible', timeout: 5000 });
-      console.log('✓ Pulsante "Invia" trovato e visibile');
+        const inviaButton = buttons.find(btn =>
+          btn.textContent?.trim() === 'Invia'
+        );
 
-      // Click sul pulsante
-      await this.page.click(buttonSelector);
-      console.log('✓ Click su "Invia" eseguito');
+        if (inviaButton) {
+          (inviaButton as HTMLElement).click();
+          return true;
+        }
+        return false;
+      });
+
+      if (!inviaButtonClicked) {
+        console.error('Pulsante "Invia" non trovato');
+        await this.takeScreenshot('invia_button_not_found');
+        return false;
+      }
+
+      console.log('✓ Pulsante "Invia" cliccato');
+      await this.takeScreenshot('invia_button_clicked');
 
       // Wait per redirect a /cm/declarations
       await this.page.waitForURL('**/cm/declarations', { timeout: 10000 });
       console.log('✓ Redirect a /cm/declarations completato');
 
-      await this.takeScreenshot('invia_button_success');
       await this.page.waitForTimeout(1000);
 
       return true;
