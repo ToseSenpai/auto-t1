@@ -2070,88 +2070,38 @@ export class WebAutomation {
     }
 
     try {
-      // Strategia: cerca label "Stato dei sigilli OK" e risali al vaadin-text-field
-      const fieldFilled = await this.page.evaluate(() => {
-        // Trova tutti i label con classe "caption-label"
-        const labels = Array.from(
-          document.querySelectorAll('label.caption-label')
-        );
+      // ID del vaadin-combo-box
+      const comboBoxId = 'com.kewill.kcm.nctsit.NCTSUnloadingRemarksIT.GoodsDeclaration.UnloadingRemark.StateOfSealsOk';
 
-        // Cerca il label "Stato dei sigilli OK"
-        const sealLabel = labels.find(label =>
-          label.textContent?.trim() === 'Stato dei sigilli OK'
-        );
+      // Seleziona valore "1" nel combo-box
+      const fieldFilled = await this.page.evaluate((cbId: string) => {
+        const comboBox = document.getElementById(cbId) as any;
 
-        if (!sealLabel) {
-          console.error('Label "Stato dei sigilli OK" non trovato');
+        if (!comboBox) {
+          console.error(`Combo-box con ID "${cbId}" non trovato`);
           return false;
         }
 
-        // Naviga al vaadin-text-field associato
-        let textField: any = null;
+        // Setta valore "1"
+        comboBox.value = "1";
 
-        // Strategia 1: Cerca vaadin-text-field nel parent del label
-        const parentElement = sealLabel.closest('.vaadin-text-field-container')?.parentElement;
-        if (parentElement && parentElement.tagName.toLowerCase().includes('vaadin-text-field')) {
-          textField = parentElement;
-        }
+        // Dispatch eventi per notificare il cambiamento
+        comboBox.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+        comboBox.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+        comboBox.dispatchEvent(new Event("blur", { bubbles: true }));
 
-        // Strategia 2: Cerca vaadin-text-field come sibling dopo il label
-        if (!textField) {
-          let sibling = sealLabel.nextElementSibling;
-          while (sibling) {
-            if (sibling.tagName.toLowerCase().includes('vaadin-text-field')) {
-              textField = sibling;
-              break;
-            }
-            sibling = sibling.nextElementSibling;
-          }
-        }
-
-        // Strategia 3: Cerca vaadin-text-field nel parent container
-        if (!textField) {
-          const container = sealLabel.closest('.vaadin-text-field-container');
-          if (container) {
-            textField = container.closest('vaadin-text-field');
-          }
-        }
-
-        if (!textField) {
-          console.error('vaadin-text-field non trovato per label "Stato dei sigilli OK"');
-          return false;
-        }
-
-        // Setta valore sul componente Vaadin
-        textField.value = "1";
-
-        // Accedi al Shadow DOM per settare anche l'input interno
-        if (textField.shadowRoot) {
-          const input = textField.shadowRoot.querySelector('input[part="value"]');
-          if (input) {
-            (input as HTMLInputElement).value = "1";
-            // Dispatch eventi sull'input interno
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-            input.dispatchEvent(new Event("blur", { bubbles: true }));
-          }
-        }
-
-        // Dispatch eventi sul componente Vaadin (con composed=true per Shadow DOM)
-        textField.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
-        textField.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-        textField.dispatchEvent(new Event("blur", { bubbles: true }));
-
-        return true;
-      });
+        // Verifica che il valore sia stato settato correttamente
+        return comboBox.value === "1";
+      }, comboBoxId);
 
       if (!fieldFilled) {
         console.error('Impossibile compilare campo "Stato dei sigilli OK"');
-        await this.takeScreenshot('seal_status_field_error');
+        await this.takeScreenshot('seal_status_combobox_error');
         return false;
       }
 
       console.log('✓ Campo "Stato dei sigilli OK" compilato con valore "1"');
-      await this.takeScreenshot('seal_status_field_filled');
+      await this.takeScreenshot('seal_status_combobox_filled');
 
       // Delay per permettere alla UI di reagire
       await this.page.waitForTimeout(500);
@@ -2159,7 +2109,7 @@ export class WebAutomation {
       return true;
     } catch (error) {
       console.error('Errore compilazione campo "Stato dei sigilli OK":', error);
-      await this.takeScreenshot('seal_status_field_exception');
+      await this.takeScreenshot('seal_status_combobox_exception');
       return false;
     }
   }
