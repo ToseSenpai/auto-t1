@@ -2072,39 +2072,51 @@ export class WebAutomation {
     try {
       // ID del vaadin-combo-box
       const comboBoxId = 'com.kewill.kcm.nctsit.NCTSUnloadingRemarksIT.GoodsDeclaration.UnloadingRemark.StateOfSealsOk';
+      const selector = `#${comboBoxId}`;
 
-      // Seleziona valore "1" nel combo-box
-      const fieldFilled = await this.page.evaluate((cbId: string) => {
-        const comboBox = document.getElementById(cbId) as any;
+      // 1. Wait per visibilità del combo-box
+      await this.page.waitForSelector(selector, { state: 'visible', timeout: 5000 });
+      console.log('✓ Combo-box trovato e visibile');
 
-        if (!comboBox) {
-          console.error(`Combo-box con ID "${cbId}" non trovato`);
-          return false;
+      // 2. Click sul combo-box per attivarlo
+      await this.page.click(selector);
+      await this.page.waitForTimeout(300);
+
+      // 3. Focus sull'input interno
+      const inputSelector = `${selector} input`;
+      await this.page.focus(inputSelector);
+
+      // 4. Clear eventuali valori esistenti
+      await this.page.evaluate((sel: string) => {
+        const input = document.querySelector(sel) as HTMLInputElement;
+        if (input) {
+          input.value = '';
         }
+      }, inputSelector);
 
-        // Setta valore "1"
-        comboBox.value = "1";
+      // 5. Type "1" come input da tastiera
+      await this.page.type(inputSelector, '1', { delay: 100 });
+      await this.page.waitForTimeout(200);
+      console.log('✓ Valore "1" digitato nel combo-box');
 
-        // Dispatch eventi per notificare il cambiamento
-        comboBox.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
-        comboBox.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-        comboBox.dispatchEvent(new Event("blur", { bubbles: true }));
+      // 6. Press Enter per confermare la selezione
+      await this.page.keyboard.press('Enter');
+      await this.page.waitForTimeout(500);
 
-        // Verifica che il valore sia stato settato correttamente
-        return comboBox.value === "1";
+      // 7. Verifica che il valore sia stato settato correttamente
+      const valueSet = await this.page.evaluate((cbId: string) => {
+        const comboBox = document.getElementById(cbId) as any;
+        return comboBox?.value === "1";
       }, comboBoxId);
 
-      if (!fieldFilled) {
-        console.error('Impossibile compilare campo "Stato dei sigilli OK"');
+      if (!valueSet) {
+        console.error('Campo "Stato dei sigilli OK" non settato correttamente dopo digitazione');
         await this.takeScreenshot('seal_status_combobox_error');
         return false;
       }
 
       console.log('✓ Campo "Stato dei sigilli OK" compilato con valore "1"');
       await this.takeScreenshot('seal_status_combobox_filled');
-
-      // Delay per permettere alla UI di reagire
-      await this.page.waitForTimeout(500);
 
       return true;
     } catch (error) {
