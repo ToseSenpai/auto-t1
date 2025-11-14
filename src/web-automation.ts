@@ -2153,18 +2153,12 @@ export class WebAutomation {
     }
 
     try {
-      // Strategia: trova vaadin-button con classe button-prominent e testo "Invia"
+      // Strategia: trova pulsante tramite ID univoco "send"
       const buttonInfo = await this.page.evaluate(() => {
-        const buttons = Array.from(
-          document.querySelectorAll('vaadin-button.button-prominent')
-        );
-
-        const inviaButton = buttons.find(btn =>
-          btn.textContent?.trim() === 'Invia'
-        ) as any;
+        const inviaButton = document.getElementById('send') as any;
 
         if (!inviaButton) {
-          return { found: false, error: 'Pulsante non trovato' };
+          return { found: false, error: 'Pulsante #send non trovato' };
         }
 
         // Verifica se il pulsante è disabilitato
