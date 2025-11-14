@@ -1116,12 +1116,27 @@ ipcMain.handle("automation:part3-search-only", async (_: any, data: any) => {
         continue;
       }
 
-      // STOP finale - verifica contenuto tab
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      // Step 8: Compila campo "Stato dei sigilli OK"
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: 'Compilazione campo "Stato dei sigilli OK"...',
+      });
+
+      const sealFieldFilled = await webAutomation.fillSealStatusField();
+      if (!sealFieldFilled) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "error",
+          message: `Impossibile compilare campo "Stato dei sigilli OK" per MRN: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // STOP finale - verifica valore inserito
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       mainWindow?.webContents.send("automation:status", {
         type: "success",
-        message: `✓ Tab "Nota di scarico" aperto per MRN: ${currentMRN}. In pausa per verifica...`,
+        message: `✓ Campo "Stato dei sigilli OK" compilato per MRN: ${currentMRN}. In pausa per verifica...`,
       });
 
       processedCount++;
