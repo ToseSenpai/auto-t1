@@ -143,6 +143,11 @@ export interface ElectronAPI {
     password: string;
     excelPath: string;
   }) => Promise<{ success: boolean; count?: number; error?: string }>;
+  startPart3SearchOnly: (data: {
+    username: string;
+    password: string;
+    excelPath: string;
+  }) => Promise<{ success: boolean; count?: number; error?: string }>;
   onStatus: (callback: (data: { type: string; message: string }) => void) => void;
   onProgress: (
     callback: (data: { current: number; total: number; rowData: any }) => void

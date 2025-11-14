@@ -827,6 +827,214 @@ ipcMain.handle("automation:check-mrn-range", async (_: any, data: any) => {
   }
 });
 
+// Handler per Parte 3: Test ricerca MRN (solo ricerca, nessuna estrazione)
+ipcMain.handle("automation:part3-search-only", async (_: any, data: any) => {
+  try {
+    const { username, password, excelPath } = data;
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Avvio test ricerca MRN (Parte 3)...",
+    });
+
+    // Inizializza WebAutomation e ExcelHandler
+    webAutomation = new WebAutomation(username, password);
+    excelHandler = new ExcelHandler(excelPath);
+
+    // Carica Excel
+    const excelLoaded = await excelHandler.load(false);
+    if (!excelLoaded) {
+      return { success: false, error: "File Excel non trovato o non caricabile" };
+    }
+
+    // Leggi colonna MRN
+    const mrnValues = excelHandler.readMRNColumn();
+    if (mrnValues.length === 0) {
+      return { success: false, error: "Nessun MRN trovato nel file Excel (colonna A)" };
+    }
+
+    const totalMRNs = mrnValues.length;
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: `Trovati ${totalMRNs} MRN da cercare`,
+    });
+
+    // Avvia browser
+    const browserStarted = await webAutomation.startBrowser();
+    if (!browserStarted) {
+      return { success: false, error: "Impossibile avviare il browser" };
+    }
+
+    // Login
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Login in corso...",
+    });
+
+    const loginSuccess = await webAutomation.login();
+    if (!loginSuccess) {
+      return { success: false, error: "Login fallito" };
+    }
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: "Login completato",
+    });
+
+    // Naviga a pagina Dichiarazioni
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Navigazione a pagina Dichiarazioni...",
+    });
+
+    const navSuccess = await webAutomation.navigateToDeclarations();
+    if (!navSuccess) {
+      return { success: false, error: "Impossibile navigare a Dichiarazioni" };
+    }
+
+    // Configurazione filtri visualizzazione
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: "Configurazione filtri visualizzazione...",
+    });
+
+    // 1. Click bottone Impostazioni
+    const settingsClicked = await webAutomation.clickSettingsButton();
+    if (!settingsClicked) {
+      return { success: false, error: "Impossibile aprire impostazioni" };
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 2. Compila campo "Public Layout" con "STANDARD ST"
+    const layoutFilled = await webAutomation.fillPublicLayout("STANDARD ST");
+    if (!layoutFilled) {
+      return { success: false, error: "Impossibile compilare Public Layout" };
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 3. Click bottone Applica
+    const applyClicked = await webAutomation.clickApplyButton();
+    if (!applyClicked) {
+      return { success: false, error: "Impossibile confermare impostazioni" };
+    }
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: "Filtri configurati correttamente",
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Calcola date range: oggi - 1 mese → oggi
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 1);
+
+    const formatDate = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const startDateStr = formatDate(startDate);
+    const endDateStr = formatDate(endDate);
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "info",
+      message: `Impostazione range date: ${startDateStr} - ${endDateStr}`,
+    });
+
+    // Compila date range
+    const dateStartFilled = await webAutomation.fillDateRangeStart(startDateStr);
+    if (!dateStartFilled) {
+      return { success: false, error: "Impossibile compilare data inizio" };
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const dateEndFilled = await webAutomation.fillDateRangeEnd(endDateStr);
+    if (!dateEndFilled) {
+      return { success: false, error: "Impossibile compilare data fine" };
+    }
+
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: "Date configurate correttamente",
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Loop ricerca MRN (SENZA estrazione risultati)
+    let processedCount = 0;
+
+    for (let mrnIndex = 0; mrnIndex < totalMRNs; mrnIndex++) {
+      const currentMRN = mrnValues[mrnIndex];
+
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: `Ricerca MRN ${mrnIndex + 1}/${totalMRNs}: ${currentMRN}`,
+      });
+
+      // Aggiorna progresso
+      mainWindow?.webContents.send("automation:progress", {
+        current: mrnIndex + 1,
+        total: totalMRNs,
+      });
+
+      // Compila campo ricerca MRN
+      const mrnFilled = await webAutomation.fillSearchMRN(currentMRN);
+      if (!mrnFilled) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `Impossibile compilare campo MRN per: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Click bottone "Trova"
+      const findClicked = await webAutomation.clickFindButton();
+      if (!findClicked) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "warning",
+          message: `Impossibile cliccare Trova per: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // STOP QUI - Attendi 3 secondi per visualizzare risultati
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      mainWindow?.webContents.send("automation:status", {
+        type: "success",
+        message: `Ricerca completata per MRN: ${currentMRN}`,
+      });
+
+      processedCount++;
+    }
+
+    // Completamento
+    mainWindow?.webContents.send("automation:status", {
+      type: "success",
+      message: `Test completato! ${processedCount}/${totalMRNs} MRN cercati. Browser lasciato aperto per verifica manuale.`,
+    });
+
+    // NON chiudere il browser per permettere verifica manuale
+    // Browser rimane aperto intenzionalmente
+
+    return { success: true, count: processedCount };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore sconosciuto",
+    };
+  }
+});
+
 ipcMain.handle("automation:process-rows", async () => {
   try {
     if (!webAutomation || !excelHandler) {

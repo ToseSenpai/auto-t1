@@ -106,6 +106,41 @@ function Controls() {
     }
   };
 
+  const handlePart3Search = async () => {
+    if (!username || !password) {
+      addLog("error", "Inserisci username e password");
+      return;
+    }
+
+    if (!excelPath) {
+      addLog("error", "Seleziona un file Excel");
+      return;
+    }
+
+    try {
+      startAutomation();
+      addLog("info", "Avvio test ricerca MRN (Parte 3)...");
+
+      // Avvia test ricerca MRN tramite IPC
+      const result = await window.electronAPI.startPart3SearchOnly({
+        username,
+        password,
+        excelPath,
+      });
+
+      if (result.success) {
+        addLog("success", `Test completato! ${result.count || 0} MRN cercati. Verifica manuale browser.`);
+      } else {
+        addLog("error", result.error || "Errore test ricerca MRN");
+      }
+
+      stopAutomation();
+    } catch (error) {
+      addLog("error", `Errore test ricerca: ${error}`);
+      stopAutomation();
+    }
+  };
+
   const getFileName = () => {
     if (!excelPath) return "Nessun file selezionato";
     const parts = excelPath.split(/[\\/]/);
@@ -233,6 +268,33 @@ function Controls() {
         </button>
         <p className="text-caption text-gray-400 text-center mt-2">
           Cerca dichiarazioni negli ultimi 30 giorni
+        </p>
+      </div>
+
+      {/* Test Ricerca MRN - Parte 3 */}
+      <div className="border-t border-gray-700/50 pt-4">
+        <button
+          onClick={handlePart3Search}
+          disabled={isRunning}
+          className="group w-full px-3 py-2.5 bg-accent-purple/90 hover:bg-accent-purple border border-accent-purple/20 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all"
+        >
+          <svg
+            className="w-4 h-4 group-hover:scale-110 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+            />
+          </svg>
+          Test Ricerca MRN (Parte 3)
+        </button>
+        <p className="text-caption text-gray-400 text-center mt-2">
+          Solo ricerca - browser aperto per verifica
         </p>
       </div>
     </div>
