@@ -1926,6 +1926,138 @@ export class WebAutomation {
   }
 
   /**
+   * Click sul bottone "Note di scarico"
+   * @returns true se click riuscito, false altrimenti
+   */
+  async clickUnloadingRemarksButton(): Promise<boolean> {
+    console.log('Click su bottone "Note di scarico"');
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      const buttonSelector = '#unloadingRemarksAction';
+
+      await this.page.waitForSelector(buttonSelector, { timeout: 5000 });
+      await this.page.click(buttonSelector);
+
+      console.log('✓ Bottone "Note di scarico" cliccato');
+      await this.takeScreenshot('unloading_remarks_button_clicked');
+
+      // Attendi dialog conferma
+      await this.page.waitForTimeout(1000);
+
+      return true;
+    } catch (error) {
+      console.error('Errore click Note di scarico:', error);
+      await this.takeScreenshot('unloading_remarks_button_error');
+      return false;
+    }
+  }
+
+  /**
+   * Click sul bottone OK del dialog di conferma
+   * @returns true se click riuscito, false altrimenti
+   */
+  async clickOKButton(): Promise<boolean> {
+    console.log('Click su bottone OK');
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      // Strategia: trova vaadin-button con testo esatto "OK"
+      const okButtonClicked = await this.page.evaluate(() => {
+        const buttons = Array.from(
+          document.querySelectorAll('vaadin-button.button-standard')
+        );
+
+        const okButton = buttons.find(btn =>
+          btn.textContent?.trim() === 'OK'
+        );
+
+        if (okButton) {
+          (okButton as HTMLElement).click();
+          return true;
+        }
+        return false;
+      });
+
+      if (!okButtonClicked) {
+        console.error('Bottone OK non trovato');
+        await this.takeScreenshot('ok_button_not_found');
+        return false;
+      }
+
+      console.log('✓ Bottone OK cliccato');
+      await this.takeScreenshot('ok_button_clicked');
+
+      // Attendi chiusura dialog e caricamento contenuto
+      await this.page.waitForTimeout(2000);
+
+      return true;
+    } catch (error) {
+      console.error('Errore click OK:', error);
+      await this.takeScreenshot('ok_button_error');
+      return false;
+    }
+  }
+
+  /**
+   * Click sul tab "Nota di scarico"
+   * @returns true se click riuscito, false altrimenti
+   */
+  async clickUnloadingRemarksTab(): Promise<boolean> {
+    console.log('Click su tab "Nota di scarico"');
+
+    if (!this.page) {
+      console.error("Browser non inizializzato");
+      return false;
+    }
+
+    try {
+      // Strategia: trova vaadin-tab con testo "Nota di scarico"
+      const tabClicked = await this.page.evaluate(() => {
+        const tabs = Array.from(
+          document.querySelectorAll('vaadin-tab')
+        );
+
+        const unloadingTab = tabs.find(tab =>
+          tab.textContent?.trim() === 'Nota di scarico'
+        );
+
+        if (unloadingTab) {
+          (unloadingTab as HTMLElement).click();
+          return true;
+        }
+        return false;
+      });
+
+      if (!tabClicked) {
+        console.error('Tab "Nota di scarico" non trovato');
+        await this.takeScreenshot('unloading_tab_not_found');
+        return false;
+      }
+
+      console.log('✓ Tab "Nota di scarico" cliccato');
+      await this.takeScreenshot('unloading_tab_clicked');
+
+      // Attendi rendering contenuto tab
+      await this.page.waitForTimeout(1500);
+
+      return true;
+    } catch (error) {
+      console.error('Errore click tab Nota di scarico:', error);
+      await this.takeScreenshot('unloading_tab_error');
+      return false;
+    }
+  }
+
+  /**
    * Getter per verificare se l'utente è loggato
    */
   get loggedIn(): boolean {

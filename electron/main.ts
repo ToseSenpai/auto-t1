@@ -1071,12 +1071,57 @@ ipcMain.handle("automation:part3-search-only", async (_: any, data: any) => {
         continue;
       }
 
-      // STOP - Delay per verifica manuale
+      // Step 5: Click bottone "Note di scarico"
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: 'Click su bottone "Note di scarico"...',
+      });
+
+      const unloadingButtonClicked = await webAutomation.clickUnloadingRemarksButton();
+      if (!unloadingButtonClicked) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "error",
+          message: `Impossibile cliccare "Note di scarico" per MRN: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // Step 6: Click bottone OK
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: 'Click su bottone OK...',
+      });
+
+      const okClicked = await webAutomation.clickOKButton();
+      if (!okClicked) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "error",
+          message: `Impossibile cliccare OK per MRN: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // Step 7: Click tab "Nota di scarico"
+      mainWindow?.webContents.send("automation:status", {
+        type: "info",
+        message: 'Click su tab "Nota di scarico"...',
+      });
+
+      const tabClicked = await webAutomation.clickUnloadingRemarksTab();
+      if (!tabClicked) {
+        mainWindow?.webContents.send("automation:status", {
+          type: "error",
+          message: `Impossibile cliccare tab "Nota di scarico" per MRN: ${currentMRN}`,
+        });
+        continue;
+      }
+
+      // STOP finale - verifica contenuto tab
       await new Promise(resolve => setTimeout(resolve, 5000));
 
       mainWindow?.webContents.send("automation:status", {
-        type: "info",
-        message: `Dichiarazione aperta per MRN: ${currentMRN}. In pausa per verifica...`,
+        type: "success",
+        message: `✓ Tab "Nota di scarico" aperto per MRN: ${currentMRN}. In pausa per verifica...`,
       });
 
       processedCount++;
