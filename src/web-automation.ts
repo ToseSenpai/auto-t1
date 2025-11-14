@@ -1877,13 +1877,17 @@ export class WebAutomation {
           const numeroRegistrazione = getCellText(baseIndex + 2);
           if (!numeroRegistrazione) break;
 
+          // Leggi Stato Oneri Doganali (col 4)
+          const statoOneriDoganali = getCellText(baseIndex + 4);
+
           // Leggi Nome Messaggio (col 7)
           const nomeMessaggio = getCellText(baseIndex + 7);
 
-          // Match: MRN corretto E nome messaggio corretto
+          // Match: MRN corretto E nome messaggio corretto E stato "Permesso di scarico"
           if (
             numeroRegistrazione === searchMRN &&
-            nomeMessaggio === "NCTS Arrival Notification IT"
+            nomeMessaggio === "NCTS Arrival Notification IT" &&
+            statoOneriDoganali === "Permesso di scarico"
           ) {
             // Ritorna lo slot della cella "Nome Messaggio"
             return baseIndex + 7;

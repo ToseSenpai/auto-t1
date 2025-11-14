@@ -772,6 +772,88 @@ const headers = Array.from(sorters).map(s => s.textContent?.trim() || '');
 
 ---
 
+## ADR-021: Status Filter for Duplicate NCTS Arrival Rows
+
+**Date**: 2025-11-14
+**Status**: ✅ Accepted
+**Context**: Parte 3 Implementation - Double-click on correct row
+
+### Problema
+
+Stesso MRN può apparire **due volte** nella tabella risultati con "NCTS Arrival Notification IT" ma con stati diversi:
+- Row 1: Stato "Rifiutato" → Stato oneri doganali "Notifica di arrivo rifiut..."
+- Row 2: Stato "Accettato" → Stato oneri doganali "Permesso di scarico"
+
+Il metodo `doubleClickNCTSArrival()` cliccava sulla **prima** riga trovata (Rifiutato) invece della seconda (Permesso di scarico), causando errore nel workflow successivo.
+
+### Decisione
+
+**Aggiungere filtro per "Stato oneri doganali" === "Permesso di scarico"**:
+
+1. **Leggere colonna aggiuntiva**: `statoOneriDoganali = getCellText(baseIndex + 4)`
+2. **Aggiungere condizione nel match**:
+   ```typescript
+   if (
+     numeroRegistrazione === searchMRN &&
+     nomeMessaggio === "NCTS Arrival Notification IT" &&
+     statoOneriDoganali === "Permesso di scarico"  // ← NUOVO FILTRO
+   ) {
+     return baseIndex + 7;  // Click su questa riga
+   }
+   ```
+3. **Scansionare tutte le righe**: Loop continua fino a trovare match completo
+
+### Conseguenze
+
+**Positive**:
+- ✅ Click sempre sulla riga corretta (Accettato, non Rifiutato)
+- ✅ Previene errori downstream nel workflow dichiarazione
+- ✅ Logica robusta anche con 3+ righe dello stesso MRN
+- ✅ Performance identica (stesso loop, una condizione in più)
+- ✅ Campo già estratto, no extra queries
+
+**Negative**:
+- ❌ Hardcoded text "Permesso di scarico" (se cambia lingua/formato, break)
+- ❌ Dipendenza da column offset 4 (se riordinano colonne, break)
+
+### Alternative Considerate
+
+1. **Usare colonna "Stato" (Accettato/Rifiutato)**:
+   - ❌ Meno specifico, può essere ambiguo
+   - ✅ "Stato oneri doganali" è più descrittivo e affidabile
+
+2. **Prendere sempre ultima riga trovata**:
+   - ❌ Non garantisce che ultima sia corretta (ordine può cambiare)
+   - ❌ Logica fragile
+
+3. **Prendere prima riga e gestire errore dopo**:
+   - ❌ Workflow complesso, richiede backtracking
+   - ❌ Spreco di tempo (open → error → retry)
+
+4. **Filtrare a livello `extractTableResults()`**:
+   - ❌ Richiede modificare logica estrazione
+   - ❌ Parte 2 usa stessa funzione, non serve filtro lì
+   - ✅ Meglio filtrare solo in `doubleClickNCTSArrival()` (single responsibility)
+
+### Implementazione
+
+**File**: `src/web-automation.ts`
+**Method**: `doubleClickNCTSArrival()` (lines 1880-1891)
+**Changes**: 3 lines added (read column + filter condition)
+
+### Rischi Mitigati
+
+- ❌ **Click su riga Rifiutato**: Workflow fallisce, screenshot error
+- ✅ **Click su riga Permesso di scarico**: Workflow successo
+
+### Testing
+
+- ✅ Testato con screenshot utente (doppio NCTS Arrival)
+- ✅ Confermato filtro seleziona riga corretta
+- ✅ Performance invariata
+
+---
+
 ## 📝 Decision Process
 
 ### Come Aggiungiamo Nuove Decisioni
@@ -800,6 +882,9 @@ const headers = Array.from(sorters).map(s => s.textContent?.trim() || '');
 ---
 
 ## 🔄 Changelog Decisioni
+
+### 2025-11-14 (Parte 3)
+- ✅ Aggiunto ADR-021: Status Filter for Duplicate NCTS Arrival Rows
 
 ### 2025-11-10 (Parte 2)
 - ✅ Aggiunti ADR-018: MRN Filtering Strategy in Table Extraction

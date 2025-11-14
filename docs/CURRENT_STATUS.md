@@ -1,7 +1,7 @@
 # Auto-T1 - Stato Corrente Implementazione
 
-**Ultimo Aggiornamento**: 2025-11-10
-**Versione**: 1.1.0
+**Ultimo Aggiornamento**: 2025-11-14
+**Versione**: 1.2.0-beta
 
 ---
 
@@ -160,6 +160,20 @@
 - [x] **Error Handling**: Skip MRN su errore e continua processing
 - [x] **Single Save**: Salvataggio Excel una volta alla fine del loop
 
+### 15. MRN Declaration Processing (Parte 3) 🟡
+- [x] **Table Analysis**: Analisi colonna "Nome Messaggio" per decidere azione
+- [x] **Decision Logic**: Skip MRN già scaricati (con "NCTS Unloading Remarks IT")
+- [x] **Status Filter**: Filtro righe con "Permesso di scarico" vs "Rifiutato"
+- [x] **Double-Click Cell**: Apertura dichiarazione da cella "NCTS Arrival Notification IT"
+- [x] **Unloading Button**: Click bottone "Note di scarico" (#unloadingRemarksAction)
+- [x] **OK Confirmation**: Click bottone OK su dialog conferma
+- [x] **Tab Navigation**: Click tab "Nota di scarico"
+- [x] **Seal Status Field**: Fill campo combo-box "Stato dei sigilli OK" con valore "1"
+- [x] **Shadow DOM Handling**: Accesso doppio Shadow DOM (combo-box → text-field → input)
+- [ ] **Send Button Click**: Click bottone "Invia" (#send) - IN PROGRESS (timing issue)
+- [x] **Multi-MRN Loop**: Loop automatico tutti MRN con skip intelligente
+- [x] **Navigation Redirect**: Wait for redirect a /cm/declarations dopo invio
+
 ---
 
 ## 🚧 Features in Progress
@@ -205,7 +219,19 @@
 ## 🐛 Known Issues
 
 ### Critici (Blockers)
-_Nessun issue critico noto_
+1. **Parte 3: Send Button Click Unreliable**
+   - **Descrizione**: Click su pulsante "Invia" (#send) non sempre funziona
+   - **Impact**: Automazione Parte 3 si blocca prima del completamento
+   - **Context**: Implementato wait loop (5s) per enabled state, ma click non sempre triggered
+   - **Debug Info**:
+     - Pulsante trovato correttamente con `getElementById('send')`
+     - Pulsante diventa enabled dopo wait
+     - Click eseguito ma a volte non registrato dal browser
+   - **Tentati**: page.evaluate + direct click, wait for enabled state
+   - **Workaround**: Nessuno affidabile
+   - **Fix Pianificato**: Investigare alternative (keyboard Enter, form submit, force click)
+   - **Priority**: ALTA
+   - **File**: `src/web-automation.ts:2147-2234` (metodo `clickInviaButton`)
 
 ### Importanti
 1. **Log Viewer Performance**
@@ -304,6 +330,25 @@ _Nessun issue critico noto_
 ---
 
 ## 🔄 Changelog Recenti
+
+### 2025-11-14 - v1.2.0-beta (Parte 3 Implementata - In Progress)
+- ✨ **Parte 3 Automation**: Workflow completo apertura dichiarazione → compilazione → invio
+- ✨ **Table Analysis**: Analisi automatica colonna "Nome Messaggio" per skip MRN già scaricati
+- ✨ **Decision Logic**: Tre casi gestiti:
+  - CASO A: Solo "NCTS Arrival" → procedi con automazione
+  - CASO B: "NCTS Arrival" + "NCTS Unloading" → skip (già scaricato)
+  - CASO C: Nessun "NCTS Arrival" → skip con warning
+- ✨ **Status Filter Fix**: Filtro righe per "Stato oneri doganali" === "Permesso di scarico"
+  - Soluzione: Doppi risultati con stesso MRN, cliccare solo su riga "Accettato"
+  - Implementazione: Aggiunta condizione in `doubleClickNCTSArrival()` (baseIndex + 4)
+- ✨ **Shadow DOM Combo-box**: Gestione combo-box Vaadin con doppio Shadow DOM
+- ✨ **Multi-step Click Sequence**: Note di scarico → OK → Tab → Fill → Invia
+- 🐛 **Known Issue**: Click pulsante "Invia" (#send) non affidabile (timing issue)
+- 📝 Documentazione sessione completa per ripresa lavoro
+- **File Modificati**:
+  - `src/web-automation.ts`: Aggiunto filtro `statoOneriDoganali` in `doubleClickNCTSArrival()`
+  - `electron/main.ts`: Handler `automation:part3-search-only` completo
+  - `docs/CURRENT_STATUS.md`: Aggiornato stato e known issues
 
 ### 2025-11-10 - v1.1.0 (Parte 2 Completata)
 - ✨ **Settings Configuration Automation**: Click bottone impostazioni + compilazione Public Layout "STANDARD ST"
