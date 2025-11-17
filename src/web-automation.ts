@@ -640,6 +640,18 @@ export class WebAutomation {
 
       console.log("✓ Navigazione a /cm/declarations completata");
 
+      // ✅ FIX CRITICO: Clicca "Nuova dichiarazione" per aprire la grid con NCTS
+      console.log("Click su bottone 'Nuova dichiarazione'...");
+      const button = this.page.locator("#btnNewDeclaration");
+      await button.waitFor({ state: "visible", timeout: 10000 });
+      await button.waitFor({ state: "attached", timeout: 10000 });
+      await button.scrollIntoViewIfNeeded();
+      await button.click();
+      console.log("✓ Click su 'Nuova dichiarazione' eseguito");
+
+      // Attendi che la navigazione/dialog si apra completamente
+      await this.page.waitForLoadState("networkidle", { timeout: 15000 });
+
       // Attendi che la grid sia caricata e attached al DOM
       const grid = this.page.locator("vaadin-grid").first();
       await grid.waitFor({ state: "attached", timeout: 10000 });
