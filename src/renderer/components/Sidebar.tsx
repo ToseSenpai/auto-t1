@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import LoginForm from "./LoginForm";
 import DateTimeConfigPanel from "./DateTimeConfigPanel";
 import Controls from "./Controls";
@@ -7,6 +8,17 @@ interface SidebarProps {
 }
 
 function Sidebar({ onOpenUpdateModal }: SidebarProps) {
+  const [appVersion, setAppVersion] = useState<string>("...");
+
+  useEffect(() => {
+    // Ottieni versione app
+    if (window.electronAPI) {
+      window.electronAPI.getAppVersion().then((version) => {
+        setAppVersion(version);
+      });
+    }
+  }, []);
+
   return (
     <div className="w-[380px] bg-gradient-to-br from-dark-900 via-dark-850 to-gray-900 border-r border-gray-700/50 flex flex-col shadow-2xl">
       {/* Header */}
@@ -32,6 +44,7 @@ function Sidebar({ onOpenUpdateModal }: SidebarProps) {
               Auto-T1
             </h1>
             <p className="text-caption-upper text-gray-400">Automazione Web</p>
+            <p className="text-[10px] text-gray-500 font-mono">v{appVersion}</p>
           </div>
           {/* Update Button */}
           {onOpenUpdateModal && (
