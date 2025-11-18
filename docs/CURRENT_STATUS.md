@@ -1,7 +1,7 @@
 # Auto-T1 - Stato Corrente Implementazione
 
 **Ultimo Aggiornamento**: 2025-11-18
-**Versione**: 1.2.1
+**Versione**: 1.2.2
 
 ---
 
@@ -174,6 +174,22 @@
 - [x] **Multi-MRN Loop**: Loop automatico tutti MRN con skip intelligente
 - [x] **Navigation Redirect**: Wait for redirect a /cm/declarations dopo invio
 
+### 16. Auto-Update System ✅
+- [x] **electron-updater Integration**: Libreria electron-updater v6.6.2 configurata
+- [x] **GitHub Releases Provider**: Pubblicazione automatica su GitHub con electron-builder
+- [x] **Auto-Check on Startup**: Controllo aggiornamenti automatico 5 secondi dopo l'avvio
+- [x] **Periodic Updates Check**: Controllo ogni 4 ore in background
+- [x] **Manual Check Button**: Pulsante "Controlla aggiornamenti" in Sidebar header
+- [x] **UpdateModal Component**: Modal React con stati (checking, available, downloading, downloaded, error)
+- [x] **Download Progress Bar**: Progress bar animata in tempo reale durante download
+- [x] **Version Display**: Numero versione visibile in Sidebar header (v{version})
+- [x] **IPC Handlers**: 4 handler per get-version, check, download, install
+- [x] **Event Listeners**: Eventi per tutti gli stati (checking, available, error, progress, downloaded)
+- [x] **Auto-Install on Quit**: Installazione automatica quando l'app si chiude
+- [x] **Type-Safe API**: TypeScript types completi per ElectronAPI
+- [x] **Logging**: electron-log per debugging processo di update
+- [x] **Tested**: Sistema testato end-to-end v1.2.1 → v1.2.2 con successo
+
 ---
 
 ## 🚧 Features in Progress
@@ -318,6 +334,36 @@ _Nessun issue critico noto_ ✅
 ---
 
 ## 🔄 Changelog Recenti
+
+### 2025-11-18 - v1.2.2 (Auto-Update System Implementato e Testato! 🚀)
+- ✨ **Sistema Auto-Update Completo**: Implementazione end-to-end con electron-updater v6.6.2
+  - **Backend**: autoUpdater configurato in `electron/main.ts` con controllo automatico all'avvio (5s) e periodico (4h)
+  - **IPC Bridge**: 4 handler (`update:get-version`, `update:check`, `update:download`, `update:install`)
+  - **Frontend**: UpdateModal React component con 6 stati (idle, checking, available, downloading, downloaded, error)
+  - **UI**: Progress bar animata in tempo reale durante download
+  - **Display Versione**: Numero versione dinamico in Sidebar header (`v{appVersion}`)
+- 🎯 **GitHub Releases Integration**: Pubblicazione automatica con electron-builder
+  - Repository configurato: `ToseSenpai/auto-t1`
+  - Provider: GitHub con `latest.yml` per delta updates
+  - Script `package:publish` per automazione release
+- ✅ **Test Completato con Successo**: Update v1.2.1 → v1.2.2 funzionante
+  - Download installer 80 MB da GitHub Releases
+  - Installazione e riavvio automatico
+  - Versione aggiornata visibile in header
+- 🐛 **Fix**: Naming mismatch `latest.yml` file reference (Auto-T1-Setup vs Auto-T1.Setup)
+- 📦 **Dipendenze**: Aggiunti `electron-updater` v6.6.2 + `electron-log` v5.4.3
+- **File Modificati**:
+  - `package.json`: Versione 1.2.2, repository GitHub, publish config
+  - `electron/main.ts`: Funzione `setupAutoUpdater()` + IPC handlers
+  - `electron/preload.ts`: API bridge per update (8 metodi + 6 eventi)
+  - `src/renderer/components/UpdateModal.tsx`: Modal UI completo (nuovo)
+  - `src/renderer/components/Sidebar.tsx`: Display versione + pulsante check update
+  - `src/renderer/App.tsx`: Integrazione UpdateModal + auto-open su update available
+  - `src/renderer/types/electron.d.ts`: Type definitions per Auto-Update API
+- **Commits**:
+  - `933625a`: feat: Implementato sistema auto-update con electron-updater
+  - `982fb95`: chore: Aggiunta dipendenza electron-log
+  - `a598996`: release: Versione 1.2.2 - Test Auto-Update
 
 ### 2025-11-18 - v1.2.1 (Parte 3 COMPLETATA + Refactoring! 🎉)
 - 🎯 **Fix Definitivo Pulsante "Invia"**: Risolto problema strict mode violation
