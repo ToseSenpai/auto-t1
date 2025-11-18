@@ -2210,17 +2210,19 @@ export class WebAutomation {
 
         if (approach1Success) {
           console.log('✓ Approccio 1: Evento dispatched con successo');
-          await this.page.waitForTimeout(1000);
 
-          // Verifica se navigazione è avvenuta
-          const currentUrl = this.page.url();
-          if (currentUrl.includes('/cm/declarations')) {
+          // Wait per VERA navigazione (event-based, non timeout-based)
+          try {
+            await Promise.race([
+              this.page.waitForNavigation({ timeout: 5000 }),
+              this.page.waitForLoadState('networkidle', { timeout: 5000 })
+            ]);
             console.log('✓ Navigazione rilevata dopo Approccio 1');
             await this.takeScreenshot('invia_approach1_success');
             return true;
+          } catch (navError) {
+            console.log('⚠️ Approccio 1: Evento dispatched ma nessuna navigazione (timeout)');
           }
-
-          console.log('⚠️ Approccio 1: Evento dispatched ma nessuna navigazione');
         }
       } catch (error) {
         console.warn('⚠️ Approccio 1 fallito:', error);
@@ -2233,17 +2235,19 @@ export class WebAutomation {
       try {
         await this.page.locator('#send').click({ timeout: 10000 });
         console.log('✓ Approccio 2: Click nativo eseguito');
-        await this.page.waitForTimeout(1000);
 
-        // Verifica navigazione
-        const currentUrl = this.page.url();
-        if (currentUrl.includes('/cm/declarations')) {
+        // Wait per VERA navigazione (event-based, non timeout-based)
+        try {
+          await Promise.race([
+            this.page.waitForNavigation({ timeout: 5000 }),
+            this.page.waitForLoadState('networkidle', { timeout: 5000 })
+          ]);
           console.log('✓ Navigazione rilevata dopo Approccio 2');
           await this.takeScreenshot('invia_approach2_success');
           return true;
+        } catch (navError) {
+          console.log('⚠️ Approccio 2: Click eseguito ma nessuna navigazione (timeout)');
         }
-
-        console.log('⚠️ Approccio 2: Click eseguito ma nessuna navigazione');
       } catch (error) {
         console.warn('⚠️ Approccio 2 fallito:', error);
         await this.takeScreenshot('invia_approach2_failed');
@@ -2257,17 +2261,19 @@ export class WebAutomation {
         await this.page.focus('#send');
         await this.page.keyboard.press('Enter');
         console.log('✓ Approccio 3: Enter premuto');
-        await this.page.waitForTimeout(1000);
 
-        // Verifica navigazione
-        const currentUrl = this.page.url();
-        if (currentUrl.includes('/cm/declarations')) {
+        // Wait per VERA navigazione (event-based, non timeout-based)
+        try {
+          await Promise.race([
+            this.page.waitForNavigation({ timeout: 5000 }),
+            this.page.waitForLoadState('networkidle', { timeout: 5000 })
+          ]);
           console.log('✓ Navigazione rilevata dopo Approccio 3');
           await this.takeScreenshot('invia_approach3_success');
           return true;
+        } catch (navError) {
+          console.log('⚠️ Approccio 3: Enter premuto ma nessuna navigazione (timeout)');
         }
-
-        console.log('⚠️ Approccio 3: Enter premuto ma nessuna navigazione');
       } catch (error) {
         console.warn('⚠️ Approccio 3 fallito:', error);
         await this.takeScreenshot('invia_approach3_failed');
@@ -2280,17 +2286,19 @@ export class WebAutomation {
       try {
         await this.page.locator('#send').click({ force: true, timeout: 10000 });
         console.log('✓ Approccio 4: Force click eseguito');
-        await this.page.waitForTimeout(1000);
 
-        // Verifica navigazione
-        const currentUrl = this.page.url();
-        if (currentUrl.includes('/cm/declarations')) {
+        // Wait per VERA navigazione (event-based, non timeout-based)
+        try {
+          await Promise.race([
+            this.page.waitForNavigation({ timeout: 5000 }),
+            this.page.waitForLoadState('networkidle', { timeout: 5000 })
+          ]);
           console.log('✓ Navigazione rilevata dopo Approccio 4');
           await this.takeScreenshot('invia_approach4_success');
           return true;
+        } catch (navError) {
+          console.log('⚠️ Approccio 4: Force click eseguito ma nessuna navigazione (timeout)');
         }
-
-        console.log('⚠️ Approccio 4: Force click eseguito ma nessuna navigazione');
       } catch (error) {
         console.warn('⚠️ Approccio 4 fallito:', error);
         await this.takeScreenshot('invia_approach4_failed');
