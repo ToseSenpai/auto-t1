@@ -2169,25 +2169,39 @@ export class WebAutomation {
     }
 
     try {
-      // Strategia: trova pulsante tramite ID univoco "send" e aspetta che diventi enabled
+      // Strategia: trova pulsante tramite ID univoco "send" e accedi al button interno nel Shadow DOM
       const buttonInfo = await this.page.evaluate(async () => {
-        const inviaButton = document.getElementById('send') as any;
+        // Trova il vaadin-button esterno
+        const vaadinButton = document.getElementById('send') as any;
 
-        if (!inviaButton) {
+        if (!vaadinButton) {
           return { found: false, error: 'Pulsante #send non trovato' };
         }
 
-        // Wait loop: aspetta max 5 secondi che il pulsante diventi enabled
+        // Accedi al Shadow DOM per trovare il button interno
+        if (!vaadinButton.shadowRoot) {
+          return { found: false, error: 'Shadow DOM non trovato' };
+        }
+
+        // Trova il button INTERNO nel Shadow DOM (questo è quello che gestisce il click!)
+        const innerButton = vaadinButton.shadowRoot.querySelector('#button') as any;
+
+        if (!innerButton) {
+          return { found: false, error: 'Button interno #button non trovato nel Shadow DOM' };
+        }
+
+        // Wait loop: aspetta max 5 secondi che il pulsante INTERNO diventi enabled
         let attempts = 0;
         const maxAttempts = 10; // 10 x 500ms = 5 secondi
 
         while (attempts < maxAttempts) {
-          const isDisabled = inviaButton.hasAttribute('disabled') || inviaButton.disabled;
+          // Controlla se il button INTERNO è disabilitato
+          const isDisabled = innerButton.hasAttribute('disabled') || innerButton.disabled;
 
           if (!isDisabled) {
-            // Pulsante enabled! Click
-            inviaButton.click();
-            return { found: true, disabled: false, clicked: true, attempts };
+            // Button enabled! Click sul button INTERNO nel Shadow DOM
+            innerButton.click();
+            return { found: true, disabled: false, clicked: true, attempts, shadowDom: true };
           }
 
           // Aspetta 500ms e riprova
@@ -2196,7 +2210,7 @@ export class WebAutomation {
         }
 
         // Timeout: pulsante rimasto disabilitato dopo 5 secondi
-        return { found: true, disabled: true, error: 'Pulsante rimasto disabilitato dopo 5s', attempts };
+        return { found: true, disabled: true, error: 'Button interno rimasto disabilitato dopo 5s', attempts };
       });
 
       console.log('Risultato ricerca pulsante:', buttonInfo);
