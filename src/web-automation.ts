@@ -2188,6 +2188,46 @@ export class WebAutomation {
       await this.page.waitForTimeout(1500);
 
       // ========================================
+      // APPROCCIO 5: Click tramite testo visibile "Invia" (PRIORITÀ MASSIMA)
+      // ========================================
+      console.log('🔧 Approccio 5: Click tramite testo visibile "Invia"');
+      try {
+        // Prova prima con getByRole (più specifico)
+        await this.page.getByRole('button', { name: 'Invia' }).click({ timeout: 5000 });
+        console.log('✓ Approccio 5: Click eseguito tramite getByRole');
+
+        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
+        try {
+          await this.page.waitForNavigation({ timeout: 5000 });
+          console.log('✓ Navigazione rilevata dopo Approccio 5');
+          await this.takeScreenshot('invia_approach5_success');
+          return true;
+        } catch (navError) {
+          console.log('⚠️ Approccio 5: Click eseguito ma nessuna navigazione (timeout)');
+        }
+      } catch (error) {
+        console.warn('⚠️ Approccio 5 fallito:', error);
+
+        // Fallback: prova con getByText
+        try {
+          console.log('🔧 Approccio 5b: Click tramite getByText("Invia")');
+          await this.page.getByText('Invia').click({ timeout: 5000 });
+          console.log('✓ Approccio 5b: Click eseguito tramite getByText');
+
+          try {
+            await this.page.waitForNavigation({ timeout: 5000 });
+            console.log('✓ Navigazione rilevata dopo Approccio 5b');
+            await this.takeScreenshot('invia_approach5b_success');
+            return true;
+          } catch (navError) {
+            console.log('⚠️ Approccio 5b: Click eseguito ma nessuna navigazione (timeout)');
+          }
+        } catch (error2) {
+          console.warn('⚠️ Approccio 5b fallito:', error2);
+        }
+      }
+
+      // ========================================
       // APPROCCIO 1: Event Dispatch con composed:true (PRIORITÀ ALTA)
       // ========================================
       console.log('🔧 Approccio 1: Event Dispatch con composed:true');
@@ -2211,12 +2251,9 @@ export class WebAutomation {
         if (approach1Success) {
           console.log('✓ Approccio 1: Evento dispatched con successo');
 
-          // Wait per VERA navigazione (event-based, non timeout-based)
+          // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
           try {
-            await Promise.race([
-              this.page.waitForNavigation({ timeout: 5000 }),
-              this.page.waitForLoadState('networkidle', { timeout: 5000 })
-            ]);
+            await this.page.waitForNavigation({ timeout: 5000 });
             console.log('✓ Navigazione rilevata dopo Approccio 1');
             await this.takeScreenshot('invia_approach1_success');
             return true;
@@ -2236,12 +2273,9 @@ export class WebAutomation {
         await this.page.locator('#send').click({ timeout: 10000 });
         console.log('✓ Approccio 2: Click nativo eseguito');
 
-        // Wait per VERA navigazione (event-based, non timeout-based)
+        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
         try {
-          await Promise.race([
-            this.page.waitForNavigation({ timeout: 5000 }),
-            this.page.waitForLoadState('networkidle', { timeout: 5000 })
-          ]);
+          await this.page.waitForNavigation({ timeout: 5000 });
           console.log('✓ Navigazione rilevata dopo Approccio 2');
           await this.takeScreenshot('invia_approach2_success');
           return true;
@@ -2262,12 +2296,9 @@ export class WebAutomation {
         await this.page.keyboard.press('Enter');
         console.log('✓ Approccio 3: Enter premuto');
 
-        // Wait per VERA navigazione (event-based, non timeout-based)
+        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
         try {
-          await Promise.race([
-            this.page.waitForNavigation({ timeout: 5000 }),
-            this.page.waitForLoadState('networkidle', { timeout: 5000 })
-          ]);
+          await this.page.waitForNavigation({ timeout: 5000 });
           console.log('✓ Navigazione rilevata dopo Approccio 3');
           await this.takeScreenshot('invia_approach3_success');
           return true;
@@ -2287,12 +2318,9 @@ export class WebAutomation {
         await this.page.locator('#send').click({ force: true, timeout: 10000 });
         console.log('✓ Approccio 4: Force click eseguito');
 
-        // Wait per VERA navigazione (event-based, non timeout-based)
+        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
         try {
-          await Promise.race([
-            this.page.waitForNavigation({ timeout: 5000 }),
-            this.page.waitForLoadState('networkidle', { timeout: 5000 })
-          ]);
+          await this.page.waitForNavigation({ timeout: 5000 });
           console.log('✓ Navigazione rilevata dopo Approccio 4');
           await this.takeScreenshot('invia_approach4_success');
           return true;
