@@ -125,6 +125,9 @@ function setupIPCHandlers() {
   try {
     const { username, password, excelPath, dateTimeConfig } = data;
 
+    // Emit part-changed event - Parte 1 in esecuzione
+    mainWindow?.webContents.send("automation:part-changed", { part: 1 });
+
     // Inizializza automazione
     webAutomation = new WebAutomation(username, password);
     excelHandler = new ExcelHandler(excelPath);
@@ -533,6 +536,9 @@ ipcMain.handle("automation:check-mrn-range", async (_: any, data: any) => {
   try {
     const { username, password, excelPath } = data;
 
+    // Emit part-changed event - Parte 2 in esecuzione
+    mainWindow?.webContents.send("automation:part-changed", { part: 2 });
+
     mainWindow?.webContents.send("automation:status", {
       type: "info",
       message: "Avvio check MRN posteriori...",
@@ -832,6 +838,9 @@ ipcMain.handle("automation:check-mrn-range", async (_: any, data: any) => {
 ipcMain.handle("automation:part3-search-only", async (_: any, data: any) => {
   try {
     const { username, password, excelPath } = data;
+
+    // Emit part-changed event - Parte 3 in esecuzione
+    mainWindow?.webContents.send("automation:part-changed", { part: 3 });
 
     mainWindow?.webContents.send("automation:status", {
       type: "info",
@@ -1254,6 +1263,9 @@ ipcMain.handle("automation:process-rows", async () => {
 
 ipcMain.handle("automation:stop", async () => {
   try {
+    // Emit part-changed event - Reset parte corrente
+    mainWindow?.webContents.send("automation:part-changed", { part: null });
+
     if (webAutomation) {
       await webAutomation.close();
       webAutomation = null;

@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useStore, DateTimeConfig } from "../store/useStore";
 
 function DateTimeConfigPanel() {
   const dateTimeConfig = useStore((state) => state.dateTimeConfig);
   const setDateTimeConfig = useStore((state) => state.setDateTimeConfig);
   const isRunning = useStore((state) => state.isRunning);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Preset options for quick selection
   const presets: { label: string; value: string; config: DateTimeConfig }[] = [
@@ -74,12 +76,34 @@ function DateTimeConfigPanel() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-base font-semibold text-gray-200 tracking-tight">
-        Data e Ora Arrivo
-      </h2>
+      {/* Collapsible Header */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between group hover:bg-gray-800/30 -mx-2 px-2 py-2 rounded-lg transition-all"
+      >
+        <h2 className="text-base font-semibold text-gray-200 tracking-tight">
+          Data e Ora Arrivo
+        </h2>
+        <svg
+          className={`w-5 h-5 text-gray-400 group-hover:text-gray-200 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
 
-      {/* Preset Dropdown */}
-      <div className="space-y-2">
+      {/* Collapsible Content */}
+      {isExpanded && (
+        <div className="space-y-4 animate-fade-in">
+          {/* Preset Dropdown */}
+          <div className="space-y-2">
         <label className="block text-caption-upper text-gray-400">
           Configurazione
         </label>
@@ -196,7 +220,9 @@ function DateTimeConfigPanel() {
           {dateTimeConfig.mode === 'custom-current' && "Verrà usata la data personalizzata con l'ora al momento dell'esecuzione"}
           {dateTimeConfig.mode === 'custom-fixed' && `Verrà usata la data personalizzata con ora fissa alle ${dateTimeConfig.fixedTime || '20:00'}`}
         </p>
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

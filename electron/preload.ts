@@ -98,6 +98,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("automation:mrn-complete", (_, data) => callback(data));
   },
 
+  onPartChanged: (
+    callback: (data: { part: 1 | 2 | 3 | null }) => void
+  ) => {
+    ipcRenderer.on("automation:part-changed", (_, data) => callback(data));
+  },
+
   // Rimuovi listener
   removeStatusListener: () => {
     ipcRenderer.removeAllListeners("automation:status");
@@ -117,6 +123,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   removeMRNCompleteListener: () => {
     ipcRenderer.removeAllListeners("automation:mrn-complete");
+  },
+
+  removePartChangedListener: () => {
+    ipcRenderer.removeAllListeners("automation:part-changed");
   },
 
   // ========================================

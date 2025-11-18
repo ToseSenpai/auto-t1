@@ -7,6 +7,7 @@ import UpdateModal from "./components/UpdateModal";
 function App() {
   const addLog = useStore((state) => state.addLog);
   const setProgress = useStore((state) => state.setProgress);
+  const setCurrentPart = useStore((state) => state.setCurrentPart);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,11 @@ function App() {
         addLog("info", `Processamento riga ${data.current}/${data.total}`);
       });
 
+      // Listen for part changes
+      window.electronAPI.onPartChanged((data) => {
+        setCurrentPart(data.part);
+      });
+
       // Auto-open update modal when update is available
       window.electronAPI.onUpdateAvailable(() => {
         setIsUpdateModalOpen(true);
@@ -40,9 +46,11 @@ function App() {
       if (window.electronAPI) {
         window.electronAPI.removeStatusListener();
         window.electronAPI.removeProgressListener();
+        window.electronAPI.removePartChangedListener();
+        window.electronAPI.removeUpdateListeners();
       }
     };
-  }, [addLog, setProgress]);
+  }, [addLog, setProgress, setCurrentPart]);
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-dark-900 via-dark-850 to-gray-900 text-gray-100 overflow-hidden">

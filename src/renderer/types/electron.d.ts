@@ -161,11 +161,15 @@ export interface ElectronAPI {
   onMRNComplete: (
     callback: (data: { mrn: string; success: boolean; error?: string }) => void
   ) => void;
+  onPartChanged: (
+    callback: (data: { part: 1 | 2 | 3 | null }) => void
+  ) => void;
   removeStatusListener: () => void;
   removeProgressListener: () => void;
   removeMRNStartListener: () => void;
   removeMRNStepListener: () => void;
   removeMRNCompleteListener: () => void;
+  removePartChangedListener: () => void;
 
   // Auto-Update API
   getAppVersion: () => Promise<string>;

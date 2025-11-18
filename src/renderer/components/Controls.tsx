@@ -158,7 +158,7 @@ function Controls() {
         <button
           onClick={handleSelectFile}
           disabled={isRunning}
-          className="group w-full px-3 py-2.5 bg-accent-green/90 hover:bg-accent-green border border-accent-green/20 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all"
+          className="group w-full px-3 py-2.5 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 hover:from-gray-900 hover:via-blue-900 hover:to-gray-900 text-white font-medium rounded-xl text-sm hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all border border-blue-900/40 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed disabled:from-gray-700/50 disabled:via-gray-700/50 disabled:to-gray-700/50"
         >
           <svg
             className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -186,7 +186,7 @@ function Controls() {
         {!isRunning ? (
           <button
             onClick={handleStart}
-            className="group flex-1 px-3 py-2.5 bg-accent-blue/90 hover:bg-accent-blue border border-accent-blue/20 rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all"
+            className="group flex-1 px-3 py-2.5 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 hover:from-gray-900 hover:via-blue-900 hover:to-gray-900 text-white font-medium rounded-xl text-sm hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all border border-blue-900/40"
           >
             <svg
               className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -195,13 +195,13 @@ function Controls() {
             >
               <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
             </svg>
-            Avvia
+            Inizia Dichiarazione
           </button>
         ) : (
           <>
             <button
               onClick={() => pauseAutomation()}
-              className="group flex-1 px-3 py-2.5 bg-accent-cyan/90 hover:bg-accent-cyan border border-accent-cyan/20 rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all"
+              className="group flex-1 px-3 py-2.5 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 hover:from-gray-900 hover:via-blue-900 hover:to-gray-900 text-white font-medium rounded-xl text-sm hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all border border-blue-900/40"
             >
               {isPaused ? (
                 <>
@@ -229,7 +229,7 @@ function Controls() {
             </button>
             <button
               onClick={handleStop}
-              className="group flex-1 px-3 py-2.5 bg-accent-purple/90 hover:bg-accent-purple border border-accent-purple/20 rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all"
+              className="group flex-1 px-3 py-2.5 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 hover:from-gray-900 hover:via-blue-900 hover:to-gray-900 text-white font-medium rounded-xl text-sm hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-1.5 transition-all border border-blue-900/40"
             >
               <svg
                 className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -249,7 +249,7 @@ function Controls() {
         <button
           onClick={handleCheckMRN}
           disabled={isRunning}
-          className="group w-full px-3 py-2.5 bg-accent-orange/90 hover:bg-accent-orange border border-accent-orange/20 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all"
+          className="group w-full px-3 py-2.5 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 hover:from-gray-900 hover:via-blue-900 hover:to-gray-900 text-white font-medium rounded-xl text-sm hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all border border-blue-900/40 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed disabled:from-gray-700/50 disabled:via-gray-700/50 disabled:to-gray-700/50"
         >
           <svg
             className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -264,11 +264,8 @@ function Controls() {
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
-          Check MRN Posteriori
+          Check Dichiarazione
         </button>
-        <p className="text-caption text-gray-400 text-center mt-2">
-          Cerca dichiarazioni negli ultimi 30 giorni
-        </p>
       </div>
 
       {/* Test Ricerca MRN - Parte 3 */}
@@ -276,7 +273,7 @@ function Controls() {
         <button
           onClick={handlePart3Search}
           disabled={isRunning}
-          className="group w-full px-3 py-2.5 bg-accent-purple/90 hover:bg-accent-purple border border-accent-purple/20 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed rounded-xl text-sm font-medium hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all"
+          className="group w-full px-3 py-2.5 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 hover:from-gray-900 hover:via-blue-900 hover:to-gray-900 text-white font-medium rounded-xl text-sm hover:shadow-elevation-2 active:scale-[0.97] flex items-center justify-center gap-2 transition-all border border-blue-900/40 disabled:bg-gray-700/50 disabled:border-gray-700/20 disabled:cursor-not-allowed disabled:from-gray-700/50 disabled:via-gray-700/50 disabled:to-gray-700/50"
         >
           <svg
             className="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -291,11 +288,8 @@ function Controls() {
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
             />
           </svg>
-          Test Ricerca MRN (Parte 3)
+          Nota di scarico
         </button>
-        <p className="text-caption text-gray-400 text-center mt-2">
-          Solo ricerca - browser aperto per verifica
-        </p>
       </div>
     </div>
   );

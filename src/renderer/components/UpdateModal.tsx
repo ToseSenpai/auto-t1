@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface UpdateModalProps {
   isOpen: boolean;
@@ -24,6 +24,7 @@ function UpdateModal({ isOpen, onClose }: UpdateModalProps) {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentVersion, setCurrentVersion] = useState("");
+  const checkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Ottieni versione corrente
@@ -67,12 +68,44 @@ function UpdateModal({ isOpen, onClose }: UpdateModalProps) {
     };
   }, []);
 
+  // Pulisci timeout quando lo stato cambia da "checking"
+  useEffect(() => {
+    if (updateState !== "checking" && checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+      checkTimeoutRef.current = null;
+    }
+  }, [updateState]);
+
   const handleCheckForUpdates = async () => {
     setUpdateState("checking");
     setErrorMessage("");
+
+    // Pulisci timeout precedente se esiste
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+    }
+
     try {
-      await window.electronAPI.checkForUpdates();
+      const result = await window.electronAPI.checkForUpdates();
+
+      // Se il check fallisce senza throw, gestisci l'errore
+      if (!result.success && result.error) {
+        setUpdateState("error");
+        setErrorMessage(result.error);
+        return;
+      }
+
+      // Timeout sicurezza: se dopo 10s lo stato è ancora "checking", mostra errore
+      checkTimeoutRef.current = setTimeout(() => {
+        setUpdateState("error");
+        setErrorMessage("Timeout: nessuna risposta dal server aggiornamenti");
+      }, 10000);
+
     } catch (error) {
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+        checkTimeoutRef.current = null;
+      }
       setUpdateState("error");
       setErrorMessage(error instanceof Error ? error.message : "Errore sconosciuto");
     }

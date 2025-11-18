@@ -253,7 +253,7 @@ export default function WebView(_props: WebViewProps) {
         </div>
 
         {/* Main Progress Section */}
-        <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-soft-lg">
+        <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/30 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-6 shadow-soft-lg">
           <div className="space-y-6">
             {/* Progress Stats */}
             <div className="flex justify-between items-center">
@@ -381,8 +381,8 @@ export default function WebView(_props: WebViewProps) {
               <p className="text-sm">Nessuna attività da visualizzare</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {logs.slice(0, 5).map((log) => (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {logs.map((log) => (
                 <div
                   key={log.id}
                   className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-700/30 border border-transparent hover:border-gray-700/30 transition-all"

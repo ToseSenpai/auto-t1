@@ -27,11 +27,16 @@ export default {
         },
         // Windows 11 accent colors
         accent: {
-          blue: "#0078D4",
-          purple: "#8E8CD8",
-          cyan: "#00B7C3",
-          green: "#107C10",
-          orange: "#D83B01",
+          blue: "#0078D4",        // Primary actions
+          "blue-hover": "#005A9E", // Hover state
+          purple: "#8E8CD8",      // Keep for gradients only
+        },
+        // Status colors (for badges/indicators, NOT buttons)
+        status: {
+          success: "#107C10",
+          error: "#D13438",
+          warning: "#F7630C",
+          info: "#0078D4",
         },
         // Modern dark backgrounds
         dark: {
@@ -74,9 +79,6 @@ export default {
         "acrylic": "0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
         "glow-blue": "0 0 20px rgba(59, 130, 246, 0.3)",
         "glow-purple": "0 0 20px rgba(142, 140, 216, 0.3)",
-        "glow-cyan": "0 0 20px rgba(0, 183, 195, 0.3)",
-        "glow-green": "0 0 20px rgba(16, 124, 16, 0.3)",
-        "glow-orange": "0 0 20px rgba(216, 59, 1, 0.3)",
         "inner-soft": "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
       },
       animation: {

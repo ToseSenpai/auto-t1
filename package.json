@@ -1,6 +1,6 @@
 {
   "name": "auto-t1",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Automazione web con TypeScript, Playwright e Excel - App Electron",
   "main": "dist-electron/main.js",
   "repository": {

@@ -44,10 +44,16 @@ export type MRNProcessingStep =
   | 'completed'             // MRN completed
   | 'error';                // Error occurred
 
+interface PartStats {
+  success: number;
+  errors: number;
+}
+
 interface AutomationState {
   // Status
   isRunning: boolean;
   isPaused: boolean;
+  currentPart: 1 | 2 | 3 | null;
 
   // Login
   username: string;
@@ -65,6 +71,9 @@ interface AutomationState {
   // Stats
   successCount: number;
   errorCount: number;
+  part1Stats: PartStats;
+  part2Stats: PartStats;
+  part3Stats: PartStats;
 
   // Logs
   logs: LogEntry[];
@@ -87,6 +96,8 @@ interface AutomationState {
   clearLogs: () => void;
   setCurrentMRN: (mrn: string | null, index: number) => void;
   setCurrentStep: (step: MRNProcessingStep | null) => void;
+  setCurrentPart: (part: 1 | 2 | 3 | null) => void;
+  incrementPartStats: (part: 1 | 2 | 3, type: "success" | "error") => void;
   reset: () => void;
 }
 
@@ -94,6 +105,7 @@ export const useStore = create<AutomationState>((set, get) => ({
   // Initial state
   isRunning: false,
   isPaused: false,
+  currentPart: null,
   username: "",
   password: "",
   excelPath: "data/input.xlsx",
@@ -106,6 +118,9 @@ export const useStore = create<AutomationState>((set, get) => ({
   percentage: 0,
   successCount: 0,
   errorCount: 0,
+  part1Stats: { success: 0, errors: 0 },
+  part2Stats: { success: 0, errors: 0 },
+  part3Stats: { success: 0, errors: 0 },
   logs: [],
   currentMRN: null,
   currentMRNIndex: 0,
@@ -172,15 +187,36 @@ export const useStore = create<AutomationState>((set, get) => ({
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
+  setCurrentPart: (part) => {
+    set({ currentPart: part });
+    if (part) {
+      get().addLog("info", `Parte ${part} in esecuzione`);
+    }
+  },
+
+  incrementPartStats: (part, type) => {
+    const statField = `part${part}Stats` as 'part1Stats' | 'part2Stats' | 'part3Stats';
+    set((state) => ({
+      [statField]: {
+        ...state[statField],
+        [type === "success" ? "success" : "errors"]: state[statField][type === "success" ? "success" : "errors"] + 1,
+      },
+    }));
+  },
+
   reset: () =>
     set({
       isRunning: false,
       isPaused: false,
+      currentPart: null,
       current: 0,
       total: 0,
       percentage: 0,
       successCount: 0,
       errorCount: 0,
+      part1Stats: { success: 0, errors: 0 },
+      part2Stats: { success: 0, errors: 0 },
+      part3Stats: { success: 0, errors: 0 },
       logs: [],
       currentMRN: null,
       currentMRNIndex: 0,

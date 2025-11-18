@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useStore } from "../store/useStore";
 import LoginForm from "./LoginForm";
 import DateTimeConfigPanel from "./DateTimeConfigPanel";
 import Controls from "./Controls";
+import ProgressBar from "./ProgressBar";
 
 interface SidebarProps {
   onOpenUpdateModal?: () => void;
@@ -9,6 +11,8 @@ interface SidebarProps {
 
 function Sidebar({ onOpenUpdateModal }: SidebarProps) {
   const [appVersion, setAppVersion] = useState<string>("...");
+  const currentPart = useStore((state) => state.currentPart);
+  const isRunning = useStore((state) => state.isRunning);
 
   useEffect(() => {
     // Ottieni versione app
@@ -44,7 +48,15 @@ function Sidebar({ onOpenUpdateModal }: SidebarProps) {
               Auto-T1
             </h1>
             <p className="text-caption-upper text-gray-400">Automazione Web</p>
-            <p className="text-[10px] text-gray-500 font-mono">v{appVersion}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] text-gray-500 font-mono">v{appVersion}</p>
+              {/* Current Part Badge */}
+              {isRunning && currentPart && (
+                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-accent-blue to-blue-600 text-white shadow-glow-blue animate-pulse">
+                  Parte {currentPart}
+                </span>
+              )}
+            </div>
           </div>
           {/* Update Button */}
           {onOpenUpdateModal && (
@@ -86,6 +98,11 @@ function Sidebar({ onOpenUpdateModal }: SidebarProps) {
         {/* Controls */}
         <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <Controls />
+        </div>
+
+        {/* Progress Bar */}
+        <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
+          <ProgressBar />
         </div>
       </div>
     </div>

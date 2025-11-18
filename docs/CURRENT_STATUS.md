@@ -335,6 +335,48 @@ _Nessun issue critico noto_ ✅
 
 ## 🔄 Changelog Recenti
 
+### 2025-11-18 - v1.2.3 (UI Redesign + Update Modal Fix! 🎨)
+- 🎨 **UI Reorganization**: Sidebar ottimizzata, WebView espansa
+  - **DateTimeConfigPanel Collapsible**: Pannello ora collassabile per risparmiare spazio (linee 77-102)
+  - **ProgressBar Aggiunto**: Barra progresso ora visibile in Sidebar (line 79-81)
+  - **LogViewer Rimosso**: Eliminata ridondanza con Recent Activity su WebView
+  - **Recent Activity Espansa**: Aumentata da 160px (5 logs) a 384px (tutti i logs) in WebView
+  - **Header Alignment Fix**: Allineamento perfetto "Data e Ora Arrivo" con altri header (-mx-2 padding)
+- 🎨 **Button Styling Redesign**: Transizione da rainbow colors a professional navy
+  - **Palette Cleanup**: Rimossi accent-cyan, accent-green, accent-orange da tailwind.config.js
+  - **Navy Gradient**: Tutti i bottoni ora usano `from-blue-900 via-blue-800 to-blue-900`
+  - **Hover Professionale**: Transizione a quasi-nero `from-gray-900 via-blue-900 to-gray-900`
+  - **Coerenza Visiva**: 6 bottoni uniformati (Inizia, Pausa, Stop, Seleziona, Check, Nota)
+  - **Colori**: blue-900 #1e3a8a (navy classico), blue-800 #1e40af, gray-900 #171717
+- 📝 **Button Renaming**: Nomi più chiari e diretti
+  - "Avvia" → "Inizia Dichiarazione" (Controls.tsx:198)
+  - "Check MRN Posteriori" → "Check Dichiarazione" (Controls.tsx:267)
+  - "Test Ricerca MRN (Parte 3)" → "Nota di scarico" (Controls.tsx:294)
+  - Rimosse descrizioni ridondanti sotto i bottoni
+- 🔄 **Part Tracking Badge**: Visual feedback parte corrente in esecuzione
+  - **Badge Dinamico**: Mostra "Parte 1/2/3" in Sidebar header durante esecuzione (Sidebar.tsx:38-42)
+  - **State Management**: `currentPart` nello Zustand store (useStore.ts:56)
+  - **IPC Events**: `automation:part-changed` inviato da main.ts (linee 1378, 1390, 1402)
+  - **Auto-Reset**: Badge si nasconde quando automazione ferma
+- 🐛 **Update Modal Spinner Fix**: Risolto spinner infinito su "Controlla Aggiornamenti"
+  - **Problema**: Modal bloccato in stato "checking" senza mai completare
+  - **Causa**: Eventi IPC asincroni arrivano dopo resolve promise, stato non aggiornato
+  - **Soluzione**: Timeout di sicurezza 10 secondi + gestione result.success (UpdateModal.tsx:78-111)
+  - **Cleanup**: Aggiunto `removeUpdateListeners()` in App.tsx:50
+  - **useRef Timeout**: checkTimeoutRef per cleanup automatico quando stato cambia (linee 27, 71-76)
+- **File Modificati**:
+  - `src/renderer/components/Sidebar.tsx`: Badge parte + ProgressBar
+  - `src/renderer/components/DateTimeConfigPanel.tsx`: Collapsible panel
+  - `src/renderer/components/Controls.tsx`: Navy buttons + rename
+  - `src/renderer/components/WebView.tsx`: Recent Activity espansa
+  - `src/renderer/components/UpdateModal.tsx`: Timeout fix + useRef cleanup
+  - `src/renderer/App.tsx`: Cleanup listener aggiunto
+  - `src/renderer/store/useStore.ts`: currentPart + part1/2/3Stats
+  - `src/renderer/types/electron.d.ts`: onPartChanged type
+  - `electron/main.ts`: automation:part-changed events
+  - `electron/preload.ts`: onPartChanged listener
+  - `tailwind.config.js`: Rimossi cyan/green/orange, aggiunti status colors
+
 ### 2025-11-18 - v1.2.2 (Auto-Update System Implementato e Testato! 🚀)
 - ✨ **Sistema Auto-Update Completo**: Implementazione end-to-end con electron-updater v6.6.2
   - **Backend**: autoUpdater configurato in `electron/main.ts` con controllo automatico all'avvio (5s) e periodico (4h)
