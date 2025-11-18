@@ -2157,8 +2157,9 @@ export class WebAutomation {
   }
 
   /**
-   * Click sul pulsante "Invia" e attende redirect a /cm/declarations
-   * @returns true se click riuscito e redirect completato, false altrimenti
+   * Click sul pulsante "Invia" in #childDeclarationForm
+   * Vaadin invia i dati in background senza redirect, quindi non aspettiamo navigazione
+   * @returns true se click riuscito, false altrimenti
    */
   async clickInviaButton(): Promise<boolean> {
     console.log('Click su pulsante "Invia"...');
@@ -2169,8 +2170,7 @@ export class WebAutomation {
     }
 
     try {
-      // Verifica esistenza pulsante (senza check disabled - Vaadin gestisce diversamente)
-      console.log('Verifica esistenza pulsante #send...');
+      // Verifica esistenza pulsante
       const buttonExists = await this.page.evaluate(() => {
         const vaadinButton = document.getElementById('send');
         return vaadinButton !== null;
@@ -2182,166 +2182,23 @@ export class WebAutomation {
         return false;
       }
 
-      console.log('✓ Pulsante trovato - provo approcci di click...');
+      console.log('✓ Pulsante trovato');
 
-      // Attesa breve per stabilità UI (Vaadin potrebbe ancora caricare)
+      // Attesa breve per stabilità UI Vaadin
       await this.page.waitForTimeout(1500);
 
-      // ========================================
-      // APPROCCIO 5: Click su pulsante "Invia" in #childDeclarationForm (PRIORITÀ MASSIMA)
-      // ========================================
-      console.log('🔧 Approccio 5: Click su pulsante "Invia" in #childDeclarationForm');
-      try {
-        // Usa parent specifico per evitare strict mode violation (ci sono 3 pulsanti "Invia")
-        await this.page.locator('#childDeclarationForm').getByRole('button', { name: 'Invia' }).click({ timeout: 5000 });
-        console.log('✓ Approccio 5: Click eseguito su #childDeclarationForm button');
+      // Click su pulsante specifico in #childDeclarationForm (evita strict mode violation)
+      // Ci sono 3 pulsanti "Invia" sulla pagina, usiamo il parent form specifico
+      await this.page.locator('#childDeclarationForm').getByRole('button', { name: 'Invia' }).click({ timeout: 5000 });
+      console.log('✓ Pulsante "Invia" cliccato');
 
-        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
-        try {
-          await this.page.waitForNavigation({ timeout: 5000 });
-          console.log('✓ Navigazione rilevata dopo Approccio 5');
-          await this.takeScreenshot('invia_approach5_success');
-          return true;
-        } catch (navError) {
-          console.log('⚠️ Approccio 5: Click eseguito ma nessuna navigazione (timeout)');
-        }
-      } catch (error) {
-        console.warn('⚠️ Approccio 5 fallito:', error);
+      // Vaadin invia i dati in background senza redirect - aspettiamo solo l'invio
+      await this.page.waitForTimeout(2000);
 
-        // Fallback: prova con selettore diretto #childDeclarationForm #send
-        try {
-          console.log('🔧 Approccio 5b: Click tramite locator #childDeclarationForm #send');
-          await this.page.locator('#childDeclarationForm #send').click({ timeout: 5000 });
-          console.log('✓ Approccio 5b: Click eseguito tramite locator diretto');
-
-          try {
-            await this.page.waitForNavigation({ timeout: 5000 });
-            console.log('✓ Navigazione rilevata dopo Approccio 5b');
-            await this.takeScreenshot('invia_approach5b_success');
-            return true;
-          } catch (navError) {
-            console.log('⚠️ Approccio 5b: Click eseguito ma nessuna navigazione (timeout)');
-          }
-        } catch (error2) {
-          console.warn('⚠️ Approccio 5b fallito:', error2);
-        }
-      }
-
-      // ========================================
-      // APPROCCIO 1: Event Dispatch con composed:true (PRIORITÀ ALTA)
-      // ========================================
-      console.log('🔧 Approccio 1: Event Dispatch con composed:true');
-      try {
-        const approach1Success = await this.page.evaluate(() => {
-          const vaadinButton = document.getElementById('send') as any;
-          if (!vaadinButton) return false;
-
-          // Dispatch MouseEvent con composed:true per attraversare Shadow DOM
-          const event = new MouseEvent('click', {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-            composed: true  // ← CHIAVE per Shadow DOM
-          });
-
-          vaadinButton.dispatchEvent(event);
-          return true;
-        });
-
-        if (approach1Success) {
-          console.log('✓ Approccio 1: Evento dispatched con successo');
-
-          // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
-          try {
-            await this.page.waitForNavigation({ timeout: 5000 });
-            console.log('✓ Navigazione rilevata dopo Approccio 1');
-            await this.takeScreenshot('invia_approach1_success');
-            return true;
-          } catch (navError) {
-            console.log('⚠️ Approccio 1: Evento dispatched ma nessuna navigazione (timeout)');
-          }
-        }
-      } catch (error) {
-        console.warn('⚠️ Approccio 1 fallito:', error);
-      }
-
-      // ========================================
-      // APPROCCIO 2: Playwright Native Click (PRIORITÀ ALTA)
-      // ========================================
-      console.log('🔧 Approccio 2: Playwright Native Click');
-      try {
-        await this.page.locator('#send').click({ timeout: 10000 });
-        console.log('✓ Approccio 2: Click nativo eseguito');
-
-        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
-        try {
-          await this.page.waitForNavigation({ timeout: 5000 });
-          console.log('✓ Navigazione rilevata dopo Approccio 2');
-          await this.takeScreenshot('invia_approach2_success');
-          return true;
-        } catch (navError) {
-          console.log('⚠️ Approccio 2: Click eseguito ma nessuna navigazione (timeout)');
-        }
-      } catch (error) {
-        console.warn('⚠️ Approccio 2 fallito:', error);
-        await this.takeScreenshot('invia_approach2_failed');
-      }
-
-      // ========================================
-      // APPROCCIO 3: Focus + Keyboard Enter (FALLBACK)
-      // ========================================
-      console.log('🔧 Approccio 3: Focus + Keyboard Enter');
-      try {
-        await this.page.focus('#send');
-        await this.page.keyboard.press('Enter');
-        console.log('✓ Approccio 3: Enter premuto');
-
-        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
-        try {
-          await this.page.waitForNavigation({ timeout: 5000 });
-          console.log('✓ Navigazione rilevata dopo Approccio 3');
-          await this.takeScreenshot('invia_approach3_success');
-          return true;
-        } catch (navError) {
-          console.log('⚠️ Approccio 3: Enter premuto ma nessuna navigazione (timeout)');
-        }
-      } catch (error) {
-        console.warn('⚠️ Approccio 3 fallito:', error);
-        await this.takeScreenshot('invia_approach3_failed');
-      }
-
-      // ========================================
-      // APPROCCIO 4: Force Click con Timeout (FALLBACK FINALE)
-      // ========================================
-      console.log('🔧 Approccio 4: Force Click');
-      try {
-        await this.page.locator('#send').click({ force: true, timeout: 10000 });
-        console.log('✓ Approccio 4: Force click eseguito');
-
-        // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
-        try {
-          await this.page.waitForNavigation({ timeout: 5000 });
-          console.log('✓ Navigazione rilevata dopo Approccio 4');
-          await this.takeScreenshot('invia_approach4_success');
-          return true;
-        } catch (navError) {
-          console.log('⚠️ Approccio 4: Force click eseguito ma nessuna navigazione (timeout)');
-        }
-      } catch (error) {
-        console.warn('⚠️ Approccio 4 fallito:', error);
-        await this.takeScreenshot('invia_approach4_failed');
-      }
-
-      // ========================================
-      // Tutti gli approcci falliti
-      // ========================================
-      console.error('❌ Tutti e 4 gli approcci falliti - click pulsante Invia non riuscito');
-      await this.takeScreenshot('invia_all_approaches_failed');
-      return false;
-
+      return true;
     } catch (error) {
-      console.error('Errore critico click pulsante "Invia":', error);
-      await this.takeScreenshot('invia_button_critical_error');
+      console.error('Errore click pulsante "Invia":', error);
+      await this.takeScreenshot('invia_button_error');
       return false;
     }
   }
