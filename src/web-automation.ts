@@ -2188,13 +2188,13 @@ export class WebAutomation {
       await this.page.waitForTimeout(1500);
 
       // ========================================
-      // APPROCCIO 5: Click tramite testo visibile "Invia" (PRIORITÀ MASSIMA)
+      // APPROCCIO 5: Click su pulsante "Invia" in #childDeclarationForm (PRIORITÀ MASSIMA)
       // ========================================
-      console.log('🔧 Approccio 5: Click tramite testo visibile "Invia"');
+      console.log('🔧 Approccio 5: Click su pulsante "Invia" in #childDeclarationForm');
       try {
-        // Prova prima con getByRole (più specifico)
-        await this.page.getByRole('button', { name: 'Invia' }).click({ timeout: 5000 });
-        console.log('✓ Approccio 5: Click eseguito tramite getByRole');
+        // Usa parent specifico per evitare strict mode violation (ci sono 3 pulsanti "Invia")
+        await this.page.locator('#childDeclarationForm').getByRole('button', { name: 'Invia' }).click({ timeout: 5000 });
+        console.log('✓ Approccio 5: Click eseguito su #childDeclarationForm button');
 
         // Wait per VERA navigazione (SOLO waitForNavigation, NO networkidle)
         try {
@@ -2208,11 +2208,11 @@ export class WebAutomation {
       } catch (error) {
         console.warn('⚠️ Approccio 5 fallito:', error);
 
-        // Fallback: prova con getByText
+        // Fallback: prova con selettore diretto #childDeclarationForm #send
         try {
-          console.log('🔧 Approccio 5b: Click tramite getByText("Invia")');
-          await this.page.getByText('Invia').click({ timeout: 5000 });
-          console.log('✓ Approccio 5b: Click eseguito tramite getByText');
+          console.log('🔧 Approccio 5b: Click tramite locator #childDeclarationForm #send');
+          await this.page.locator('#childDeclarationForm #send').click({ timeout: 5000 });
+          console.log('✓ Approccio 5b: Click eseguito tramite locator diretto');
 
           try {
             await this.page.waitForNavigation({ timeout: 5000 });
