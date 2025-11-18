@@ -2169,47 +2169,23 @@ export class WebAutomation {
     }
 
     try {
-      // Verifica che il pulsante esista e sia enabled (max 5 secondi)
-      console.log('Attesa che pulsante #send diventi enabled...');
-      const isEnabled = await this.page.evaluate(async () => {
-        const vaadinButton = document.getElementById('send') as any;
-        if (!vaadinButton) {
-          return { found: false, error: 'Pulsante #send non trovato' };
-        }
-
-        // Wait loop: max 5 secondi per enabled state
-        let attempts = 0;
-        const maxAttempts = 10; // 10 x 500ms = 5 secondi
-
-        while (attempts < maxAttempts) {
-          const isDisabled = vaadinButton.hasAttribute('disabled') || vaadinButton.disabled;
-
-          if (!isDisabled) {
-            return { found: true, enabled: true, attempts };
-          }
-
-          await new Promise(resolve => setTimeout(resolve, 500));
-          attempts++;
-        }
-
-        return { found: true, enabled: false, error: 'Pulsante rimasto disabilitato dopo 5s' };
+      // Verifica esistenza pulsante (senza check disabled - Vaadin gestisce diversamente)
+      console.log('Verifica esistenza pulsante #send...');
+      const buttonExists = await this.page.evaluate(() => {
+        const vaadinButton = document.getElementById('send');
+        return vaadinButton !== null;
       });
 
-      console.log('Stato pulsante:', isEnabled);
-
-      if (!isEnabled.found) {
+      if (!buttonExists) {
         console.error('Pulsante "Invia" non trovato');
         await this.takeScreenshot('invia_button_not_found');
         return false;
       }
 
-      if (!isEnabled.enabled) {
-        console.error('Pulsante "Invia" rimasto disabilitato');
-        await this.takeScreenshot('invia_button_disabled');
-        return false;
-      }
+      console.log('✓ Pulsante trovato - provo approcci di click...');
 
-      console.log(`✓ Pulsante enabled dopo ${isEnabled.attempts} tentativi`);
+      // Attesa breve per stabilità UI (Vaadin potrebbe ancora caricare)
+      await this.page.waitForTimeout(1500);
 
       // ========================================
       // APPROCCIO 1: Event Dispatch con composed:true (PRIORITÀ ALTA)
