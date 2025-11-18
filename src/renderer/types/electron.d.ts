@@ -166,6 +166,29 @@ export interface ElectronAPI {
   removeMRNStartListener: () => void;
   removeMRNStepListener: () => void;
   removeMRNCompleteListener: () => void;
+
+  // Auto-Update API
+  getAppVersion: () => Promise<string>;
+  checkForUpdates: () => Promise<{
+    success: boolean;
+    updateInfo?: any;
+    error?: string;
+  }>;
+  downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
+  installUpdate: () => Promise<{ success: boolean; error?: string }>;
+  onUpdateChecking: (callback: () => void) => void;
+  onUpdateAvailable: (
+    callback: (data: {
+      version: string;
+      releaseDate: string;
+      releaseNotes: string;
+    }) => void
+  ) => void;
+  onUpdateNotAvailable: (callback: () => void) => void;
+  onUpdateError: (callback: (error: string) => void) => void;
+  onUpdateDownloadProgress: (callback: (percent: number) => void) => void;
+  onUpdateDownloaded: (callback: (data: { version: string }) => void) => void;
+  removeUpdateListeners: () => void;
 }
 
 declare global {

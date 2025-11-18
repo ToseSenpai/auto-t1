@@ -1,8 +1,12 @@
 {
   "name": "auto-t1",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "description": "Automazione web con TypeScript, Playwright e Excel - App Electron",
   "main": "dist-electron/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ToseSenpai/auto-t1.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
@@ -14,7 +18,8 @@
     "watch": "tsc --watch",
     "clean": "rimraf dist dist-electron out",
     "lint": "eslint src --ext .ts,.tsx",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "package:publish": "electron-builder --publish always"
   },
   "keywords": [
     "automation",
@@ -28,6 +33,7 @@
   "license": "ISC",
   "dependencies": {
     "@playwright/test": "^1.41.0",
+    "electron-updater": "^6.6.2",
     "exceljs": "^4.4.0",
     "playwright": "^1.41.0",
     "react": "^18.2.0",
@@ -70,13 +76,24 @@
       "dist-electron/**/*"
     ],
     "win": {
-      "target": ["nsis"]
+      "target": [
+        "nsis"
+      ]
     },
     "mac": {
-      "target": ["dmg"]
+      "target": [
+        "dmg"
+      ]
     },
     "linux": {
-      "target": ["AppImage"]
+      "target": [
+        "AppImage"
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "ToseSenpai",
+      "repo": "auto-t1"
     }
   }
 }

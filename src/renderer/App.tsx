@@ -1,11 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "./store/useStore";
 import Sidebar from "./components/Sidebar";
 import WebView from "./components/WebView";
+import UpdateModal from "./components/UpdateModal";
 
 function App() {
   const addLog = useStore((state) => state.addLog);
   const setProgress = useStore((state) => state.setProgress);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   useEffect(() => {
     // Setup IPC listeners
@@ -26,6 +28,11 @@ function App() {
         setProgress(data.current, data.total);
         addLog("info", `Processamento riga ${data.current}/${data.total}`);
       });
+
+      // Auto-open update modal when update is available
+      window.electronAPI.onUpdateAvailable(() => {
+        setIsUpdateModalOpen(true);
+      });
     }
 
     return () => {
@@ -40,12 +47,15 @@ function App() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-dark-900 via-dark-850 to-gray-900 text-gray-100 overflow-hidden">
       {/* Sidebar - 380px fisso */}
-      <Sidebar />
+      <Sidebar onOpenUpdateModal={() => setIsUpdateModalOpen(true)} />
 
       {/* Browser View Area - Unified gradient background */}
       <div className="flex-1 relative bg-gradient-to-br from-dark-900 via-dark-850 to-gray-900 shadow-inner">
         <WebView initialUrl="about:blank" />
       </div>
+
+      {/* Update Modal */}
+      <UpdateModal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)} />
     </div>
   );
 }

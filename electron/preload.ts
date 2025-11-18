@@ -118,6 +118,63 @@ contextBridge.exposeInMainWorld("electronAPI", {
   removeMRNCompleteListener: () => {
     ipcRenderer.removeAllListeners("automation:mrn-complete");
   },
+
+  // ========================================
+  // AUTO-UPDATE API
+  // ========================================
+
+  // Ottieni versione corrente app
+  getAppVersion: () => ipcRenderer.invoke("update:get-version"),
+
+  // Controlla manualmente aggiornamenti
+  checkForUpdates: () => ipcRenderer.invoke("update:check"),
+
+  // Scarica aggiornamento disponibile
+  downloadUpdate: () => ipcRenderer.invoke("update:download"),
+
+  // Installa aggiornamento e riavvia
+  installUpdate: () => ipcRenderer.invoke("update:install"),
+
+  // Listener eventi auto-update
+  onUpdateChecking: (callback: () => void) => {
+    ipcRenderer.on("update:checking", () => callback());
+  },
+
+  onUpdateAvailable: (
+    callback: (data: {
+      version: string;
+      releaseDate: string;
+      releaseNotes: string;
+    }) => void
+  ) => {
+    ipcRenderer.on("update:available", (_, data) => callback(data));
+  },
+
+  onUpdateNotAvailable: (callback: () => void) => {
+    ipcRenderer.on("update:not-available", () => callback());
+  },
+
+  onUpdateError: (callback: (error: string) => void) => {
+    ipcRenderer.on("update:error", (_, error) => callback(error));
+  },
+
+  onUpdateDownloadProgress: (callback: (percent: number) => void) => {
+    ipcRenderer.on("update:download-progress", (_, percent) => callback(percent));
+  },
+
+  onUpdateDownloaded: (callback: (data: { version: string }) => void) => {
+    ipcRenderer.on("update:downloaded", (_, data) => callback(data));
+  },
+
+  // Rimuovi listener update
+  removeUpdateListeners: () => {
+    ipcRenderer.removeAllListeners("update:checking");
+    ipcRenderer.removeAllListeners("update:available");
+    ipcRenderer.removeAllListeners("update:not-available");
+    ipcRenderer.removeAllListeners("update:error");
+    ipcRenderer.removeAllListeners("update:download-progress");
+    ipcRenderer.removeAllListeners("update:downloaded");
+  },
 });
 
 // Type definitions per TypeScript
@@ -170,6 +227,29 @@ export interface ElectronAPI {
   removeMRNStartListener: () => void;
   removeMRNStepListener: () => void;
   removeMRNCompleteListener: () => void;
+
+  // Auto-Update API
+  getAppVersion: () => Promise<string>;
+  checkForUpdates: () => Promise<{
+    success: boolean;
+    updateInfo?: any;
+    error?: string;
+  }>;
+  downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
+  installUpdate: () => Promise<{ success: boolean; error?: string }>;
+  onUpdateChecking: (callback: () => void) => void;
+  onUpdateAvailable: (
+    callback: (data: {
+      version: string;
+      releaseDate: string;
+      releaseNotes: string;
+    }) => void
+  ) => void;
+  onUpdateNotAvailable: (callback: () => void) => void;
+  onUpdateError: (callback: (error: string) => void) => void;
+  onUpdateDownloadProgress: (callback: (percent: number) => void) => void;
+  onUpdateDownloaded: (callback: (data: { version: string }) => void) => void;
+  removeUpdateListeners: () => void;
 }
 
 declare global {

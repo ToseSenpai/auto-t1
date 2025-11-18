@@ -5,6 +5,7 @@
 
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
 const { join, basename } = require("path");
+const { autoUpdater } = require("electron-updater");
 
 import { WebAutomation } from "../src/web-automation";
 import { ExcelHandler } from "../src/excel-handler";
@@ -1311,6 +1312,70 @@ ipcMain.handle("excel:select-file", async () => {
     };
   }
 });
+
+// ========================================
+// IPC HANDLERS - AUTO-UPDATE
+// ========================================
+
+/**
+ * Restituisce la versione corrente dell'app
+ */
+ipcMain.handle("update:get-version", async () => {
+  return app.getVersion();
+});
+
+/**
+ * Avvia il download manuale di un aggiornamento disponibile
+ */
+ipcMain.handle("update:download", async () => {
+  try {
+    console.log("[AUTO-UPDATE] Avvio download aggiornamento...");
+    await autoUpdater.downloadUpdate();
+    return { success: true };
+  } catch (error) {
+    console.error("[AUTO-UPDATE] Errore download:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore download aggiornamento",
+    };
+  }
+});
+
+/**
+ * Installa l'aggiornamento scaricato e riavvia l'app
+ */
+ipcMain.handle("update:install", async () => {
+  try {
+    console.log("[AUTO-UPDATE] Installazione aggiornamento e riavvio...");
+    setImmediate(() => {
+      autoUpdater.quitAndInstall(false, true);
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("[AUTO-UPDATE] Errore installazione:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore installazione aggiornamento",
+    };
+  }
+});
+
+/**
+ * Controlla manualmente la disponibilità di aggiornamenti
+ */
+ipcMain.handle("update:check", async () => {
+  try {
+    console.log("[AUTO-UPDATE] Controllo manuale aggiornamenti...");
+    const result = await autoUpdater.checkForUpdates();
+    return { success: true, updateInfo: result?.updateInfo };
+  } catch (error) {
+    console.error("[AUTO-UPDATE] Errore controllo manuale:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore controllo aggiornamenti",
+    };
+  }
+});
 }
 
 /**
@@ -1339,10 +1404,90 @@ async function processRow(
   return results;
 }
 
+// ========================================
+// AUTO-UPDATER CONFIGURATION
+// ========================================
+
+/**
+ * Configura e inizializza autoUpdater per gestire aggiornamenti da GitHub Releases
+ * L'app controlla aggiornamenti all'avvio e permette download/installazione manuale
+ */
+function setupAutoUpdater() {
+  // Configurazione autoUpdater
+  autoUpdater.autoDownload = false; // Non scaricare automaticamente (chiediamo conferma utente)
+  autoUpdater.autoInstallOnAppQuit = true; // Installa automaticamente quando l'app si chiude
+
+  // Logger per debug (opzionale)
+  autoUpdater.logger = require("electron-log");
+  autoUpdater.logger.transports.file.level = "info";
+
+  // Event: Inizio controllo aggiornamenti
+  autoUpdater.on("checking-for-update", () => {
+    console.log("[AUTO-UPDATE] Controllo aggiornamenti in corso...");
+    mainWindow?.webContents.send("update:checking");
+  });
+
+  // Event: Aggiornamento disponibile
+  autoUpdater.on("update-available", (info: any) => {
+    console.log("[AUTO-UPDATE] Aggiornamento disponibile:", info.version);
+    mainWindow?.webContents.send("update:available", {
+      version: info.version,
+      releaseDate: info.releaseDate,
+      releaseNotes: info.releaseNotes,
+    });
+  });
+
+  // Event: Nessun aggiornamento disponibile
+  autoUpdater.on("update-not-available", (info: any) => {
+    console.log("[AUTO-UPDATE] Nessun aggiornamento disponibile (versione corrente:", info.version, ")");
+    mainWindow?.webContents.send("update:not-available");
+  });
+
+  // Event: Errore durante controllo/download
+  autoUpdater.on("error", (error: Error) => {
+    console.error("[AUTO-UPDATE] Errore:", error.message);
+    mainWindow?.webContents.send("update:error", error.message);
+  });
+
+  // Event: Progresso download (percentuale)
+  autoUpdater.on("download-progress", (progressObj: any) => {
+    const progressPercent = Math.round(progressObj.percent);
+    console.log(`[AUTO-UPDATE] Download: ${progressPercent}% (${progressObj.transferred}/${progressObj.total} bytes)`);
+    mainWindow?.webContents.send("update:download-progress", progressPercent);
+  });
+
+  // Event: Download completato, pronto per installazione
+  autoUpdater.on("update-downloaded", (info: any) => {
+    console.log("[AUTO-UPDATE] Download completato. Versione:", info.version);
+    mainWindow?.webContents.send("update:downloaded", {
+      version: info.version,
+    });
+  });
+
+  // Controlla aggiornamenti 5 secondi dopo l'avvio (per dare tempo alla UI)
+  setTimeout(() => {
+    console.log("[AUTO-UPDATE] Controllo aggiornamenti avviato...");
+    autoUpdater.checkForUpdates().catch((err: Error) => {
+      console.error("[AUTO-UPDATE] Errore controllo aggiornamenti:", err.message);
+    });
+  }, 5000);
+
+  // Controlla aggiornamenti ogni 4 ore (14400000 ms)
+  setInterval(() => {
+    console.log("[AUTO-UPDATE] Controllo periodico aggiornamenti...");
+    autoUpdater.checkForUpdates().catch((err: Error) => {
+      console.error("[AUTO-UPDATE] Errore controllo periodico:", err.message);
+    });
+  }, 4 * 60 * 60 * 1000);
+}
+
 // Gestione lifecycle app
 app.whenReady().then(() => {
   // Setup IPC handlers prima di tutto
   setupIPCHandlers();
+
+  // Setup auto-updater
+  setupAutoUpdater();
 
   // Crea splash immediatamente
   createSplashWindow();
