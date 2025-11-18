@@ -2169,99 +2169,167 @@ export class WebAutomation {
     }
 
     try {
-      // Strategia: trova pulsante tramite ID univoco "send" e accedi al button interno nel Shadow DOM
-      const buttonInfo = await this.page.evaluate(async () => {
-        // Trova il vaadin-button esterno
+      // Verifica che il pulsante esista e sia enabled (max 5 secondi)
+      console.log('Attesa che pulsante #send diventi enabled...');
+      const isEnabled = await this.page.evaluate(async () => {
         const vaadinButton = document.getElementById('send') as any;
-
         if (!vaadinButton) {
           return { found: false, error: 'Pulsante #send non trovato' };
         }
 
-        // Accedi al Shadow DOM per trovare il button interno
-        if (!vaadinButton.shadowRoot) {
-          return { found: false, error: 'Shadow DOM non trovato' };
-        }
-
-        // Trova il button INTERNO nel Shadow DOM (questo è quello che gestisce il click!)
-        const innerButton = vaadinButton.shadowRoot.querySelector('#button') as any;
-
-        if (!innerButton) {
-          return { found: false, error: 'Button interno #button non trovato nel Shadow DOM' };
-        }
-
-        // Wait loop: aspetta max 5 secondi che il pulsante INTERNO diventi enabled
+        // Wait loop: max 5 secondi per enabled state
         let attempts = 0;
         const maxAttempts = 10; // 10 x 500ms = 5 secondi
 
         while (attempts < maxAttempts) {
-          // Controlla se il button INTERNO è disabilitato
-          const isDisabled = innerButton.hasAttribute('disabled') || innerButton.disabled;
+          const isDisabled = vaadinButton.hasAttribute('disabled') || vaadinButton.disabled;
 
           if (!isDisabled) {
-            // Button enabled! Click sul button INTERNO nel Shadow DOM
-            innerButton.click();
-            return { found: true, disabled: false, clicked: true, attempts, shadowDom: true };
+            return { found: true, enabled: true, attempts };
           }
 
-          // Aspetta 500ms e riprova
           await new Promise(resolve => setTimeout(resolve, 500));
           attempts++;
         }
 
-        // Timeout: pulsante rimasto disabilitato dopo 5 secondi
-        return { found: true, disabled: true, error: 'Button interno rimasto disabilitato dopo 5s', attempts };
+        return { found: true, enabled: false, error: 'Pulsante rimasto disabilitato dopo 5s' };
       });
 
-      console.log('Risultato ricerca pulsante:', buttonInfo);
+      console.log('Stato pulsante:', isEnabled);
 
-      if (!buttonInfo.found) {
+      if (!isEnabled.found) {
         console.error('Pulsante "Invia" non trovato');
         await this.takeScreenshot('invia_button_not_found');
         return false;
       }
 
-      if (buttonInfo.disabled) {
-        console.error('Pulsante "Invia" è disabilitato');
+      if (!isEnabled.enabled) {
+        console.error('Pulsante "Invia" rimasto disabilitato');
         await this.takeScreenshot('invia_button_disabled');
         return false;
       }
 
-      if (!buttonInfo.clicked) {
-        console.error('Click su "Invia" fallito');
-        await this.takeScreenshot('invia_button_click_failed');
-        return false;
-      }
+      console.log(`✓ Pulsante enabled dopo ${isEnabled.attempts} tentativi`);
 
-      console.log('✓ Pulsante "Invia" cliccato');
-      await this.takeScreenshot('invia_button_clicked');
-
-      // Wait per VERA navigazione (non solo verifica URL)
+      // ========================================
+      // APPROCCIO 1: Event Dispatch con composed:true (PRIORITÀ ALTA)
+      // ========================================
+      console.log('🔧 Approccio 1: Event Dispatch con composed:true');
       try {
-        console.log('Attesa navigazione a /cm/declarations...');
-        await Promise.race([
-          this.page.waitForNavigation({ timeout: 10000 }),
-          this.page.waitForURL('**/cm/declarations', { timeout: 10000 })
-        ]);
-        console.log('✓ Navigazione completata');
-      } catch (navError) {
-        console.warn('Timeout navigazione - verifico URL corrente');
-        const currentUrl = this.page.url();
-        console.log('URL corrente:', currentUrl);
+        const approach1Success = await this.page.evaluate(() => {
+          const vaadinButton = document.getElementById('send') as any;
+          if (!vaadinButton) return false;
 
-        if (!currentUrl.includes('/cm/declarations')) {
-          console.error('Navigazione fallita - URL non corretto');
-          await this.takeScreenshot('invia_navigation_failed');
-          return false;
+          // Dispatch MouseEvent con composed:true per attraversare Shadow DOM
+          const event = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+            composed: true  // ← CHIAVE per Shadow DOM
+          });
+
+          vaadinButton.dispatchEvent(event);
+          return true;
+        });
+
+        if (approach1Success) {
+          console.log('✓ Approccio 1: Evento dispatched con successo');
+          await this.page.waitForTimeout(1000);
+
+          // Verifica se navigazione è avvenuta
+          const currentUrl = this.page.url();
+          if (currentUrl.includes('/cm/declarations')) {
+            console.log('✓ Navigazione rilevata dopo Approccio 1');
+            await this.takeScreenshot('invia_approach1_success');
+            return true;
+          }
+
+          console.log('⚠️ Approccio 1: Evento dispatched ma nessuna navigazione');
         }
+      } catch (error) {
+        console.warn('⚠️ Approccio 1 fallito:', error);
       }
 
-      await this.page.waitForTimeout(1000);
+      // ========================================
+      // APPROCCIO 2: Playwright Native Click (PRIORITÀ ALTA)
+      // ========================================
+      console.log('🔧 Approccio 2: Playwright Native Click');
+      try {
+        await this.page.locator('#send').click({ timeout: 10000 });
+        console.log('✓ Approccio 2: Click nativo eseguito');
+        await this.page.waitForTimeout(1000);
 
-      return true;
+        // Verifica navigazione
+        const currentUrl = this.page.url();
+        if (currentUrl.includes('/cm/declarations')) {
+          console.log('✓ Navigazione rilevata dopo Approccio 2');
+          await this.takeScreenshot('invia_approach2_success');
+          return true;
+        }
+
+        console.log('⚠️ Approccio 2: Click eseguito ma nessuna navigazione');
+      } catch (error) {
+        console.warn('⚠️ Approccio 2 fallito:', error);
+        await this.takeScreenshot('invia_approach2_failed');
+      }
+
+      // ========================================
+      // APPROCCIO 3: Focus + Keyboard Enter (FALLBACK)
+      // ========================================
+      console.log('🔧 Approccio 3: Focus + Keyboard Enter');
+      try {
+        await this.page.focus('#send');
+        await this.page.keyboard.press('Enter');
+        console.log('✓ Approccio 3: Enter premuto');
+        await this.page.waitForTimeout(1000);
+
+        // Verifica navigazione
+        const currentUrl = this.page.url();
+        if (currentUrl.includes('/cm/declarations')) {
+          console.log('✓ Navigazione rilevata dopo Approccio 3');
+          await this.takeScreenshot('invia_approach3_success');
+          return true;
+        }
+
+        console.log('⚠️ Approccio 3: Enter premuto ma nessuna navigazione');
+      } catch (error) {
+        console.warn('⚠️ Approccio 3 fallito:', error);
+        await this.takeScreenshot('invia_approach3_failed');
+      }
+
+      // ========================================
+      // APPROCCIO 4: Force Click con Timeout (FALLBACK FINALE)
+      // ========================================
+      console.log('🔧 Approccio 4: Force Click');
+      try {
+        await this.page.locator('#send').click({ force: true, timeout: 10000 });
+        console.log('✓ Approccio 4: Force click eseguito');
+        await this.page.waitForTimeout(1000);
+
+        // Verifica navigazione
+        const currentUrl = this.page.url();
+        if (currentUrl.includes('/cm/declarations')) {
+          console.log('✓ Navigazione rilevata dopo Approccio 4');
+          await this.takeScreenshot('invia_approach4_success');
+          return true;
+        }
+
+        console.log('⚠️ Approccio 4: Force click eseguito ma nessuna navigazione');
+      } catch (error) {
+        console.warn('⚠️ Approccio 4 fallito:', error);
+        await this.takeScreenshot('invia_approach4_failed');
+      }
+
+      // ========================================
+      // Tutti gli approcci falliti
+      // ========================================
+      console.error('❌ Tutti e 4 gli approcci falliti - click pulsante Invia non riuscito');
+      await this.takeScreenshot('invia_all_approaches_failed');
+      return false;
+
     } catch (error) {
-      console.error('Errore click pulsante "Invia":', error);
-      await this.takeScreenshot('invia_button_error');
+      console.error('Errore critico click pulsante "Invia":', error);
+      await this.takeScreenshot('invia_button_critical_error');
       return false;
     }
   }
