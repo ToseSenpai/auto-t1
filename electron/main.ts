@@ -57,6 +57,7 @@ function createWindow() {
     },
     title: "Auto-T1 - Automazione Web",
     backgroundColor: "#1f2937",
+    icon: join(__dirname, "../resources/icon.ico"),
   });
 
   // Rimuovi la barra del menu (File, Edit, View, Window, Help)
